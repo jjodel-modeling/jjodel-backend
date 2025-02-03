@@ -1,0 +1,6 @@
+@jjodel_persistence_HostAddress = http://localhost:5116
+
+GET {{jjodel_persistence_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

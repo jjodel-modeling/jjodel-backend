@@ -1,0 +1,454 @@
+﻿using jjodel_persistence.Models.Entity;
+using jjodel_persistence.Models.Mail;
+using jjodel_persistence.Models.Dto;
+using jjodel_persistence.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using jjodel_persistence.Models.Settings;
+using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+
+namespace jjodel_persistence.Controllers {
+    [Route("api/[controller]")]
+    [Route("api")]
+    [ApiController]
+    public class AccountController : ControllerBase {
+
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly ILogger<AccountController> _logger;
+        private readonly MailService _mailService;
+        private readonly AuthService _authService;
+        private readonly Jwt _jwtSettings;
+
+
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<ApplicationRole> roleManager,
+            ILogger<AccountController> logger,
+            MailService mailService,
+            AuthService authService,
+            IOptions<Jwt> jwtSettings
+            ) {
+
+            this._userManager = userManager;
+            this._signInManager = signInManager;
+            this._roleManager = roleManager;
+            this._mailService = mailService;
+            this._logger = logger;
+            this._authService = authService;
+            this._jwtSettings = jwtSettings.Value;
+
+        }
+
+
+
+        //[Authorize(Roles = "Admin")]
+        //[HttpPost("Add")]
+        //public async Task<IActionResult> Add([FromBody] AspNetUserResponse request) {
+        //    try {
+        //        if(ModelState.IsValid) {
+        //            var user = new ApplicationUser {
+        //                Id = Guid.NewGuid().ToString(),
+        //                UserName = request.Email,
+        //                Surname = request.Surname,
+        //                Name = request.Name,
+        //                Email = request.Email,
+        //                EmailConfirmed = true,
+        //                PhoneNumber = request.PhoneNumber
+
+        //            };
+        //            string password = _authService.GenerateRandomPassword();
+        //            // create user.
+        //            var result = await _userManager.CreateAsync(user, password);
+        //            if(!result.Succeeded) {
+        //                return BadRequest();
+        //            }
+        //            // assign user role.
+        //            await _userManager.AddToRolesAsync(user, request.Roles);
+        //            // send mail.
+        //            await _mailService.SendEmail(
+        //                new List<string> { request.Email },
+        //                "Registrazione Completata", "Register",
+        //                new Register() {
+        //                    Name = request.Email,
+        //                    Password = password,
+        //                    Surname = request.Surname
+        //                });
+        //            return Ok(result);
+        //        }
+        //        else {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch(Exception ex) {
+        //        this._logger.LogError("Add user error:" + ex.Message);
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //}
+
+        [AllowAnonymous]    
+        [HttpPost("confirm")]
+        public async Task<IActionResult> Confirm([FromBody] ConfirmAccountRequest confirmAccountRequest) {
+            try {
+                if(ModelState.IsValid) {
+                    this._logger.LogInformation("Confirming Account:" + confirmAccountRequest.UserId);
+
+                    ApplicationUser user = await _userManager.FindByIdAsync(confirmAccountRequest.UserId);
+                    if(user != null) {
+                        IdentityResult result = await _userManager.ConfirmEmailAsync(user, confirmAccountRequest.Token);
+                        if(result.Succeeded) {
+                            this._logger.LogInformation("Confirmed Account:" + confirmAccountRequest.UserId);
+
+                            return Ok();
+                        }
+                    }
+                    this._logger.LogInformation("Confirming Account failed for user: " + confirmAccountRequest.UserId);
+                }
+
+                return BadRequest();
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Confirm Account error:" + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest) {
+            try {
+                if(ModelState.IsValid) {
+                    this._logger.LogInformation("Changing Password: " + changePasswordRequest.UserName);
+
+                    var user = await _userManager.FindByNameAsync(changePasswordRequest.UserName);
+                    if(user == null || !(await _userManager.IsEmailConfirmedAsync(user))) {
+                        this._logger.LogInformation("User does not exists or is not confirmed: " + changePasswordRequest.UserName);
+
+                        return BadRequest();
+                    }
+                    else {
+                        var res = await _userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.Password);
+                        if(res.Succeeded) {
+                            this._logger.LogInformation("Password changed: " + changePasswordRequest.UserName);
+                            return Ok();
+                        }
+                        this._logger.LogInformation("Change Password error: " + changePasswordRequest.UserName);
+                    }
+                }
+                return BadRequest();
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Change Password error:" + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{username}")]
+        //public async Task<IActionResult> Delete(string username) {
+        //    try {
+        //        var user = await _userManager.FindByNameAsync(username);
+        //        if(user == null) {
+        //            return BadRequest();
+        //        }
+        //        var result = await _userManager.DeleteAsync(user);
+        //        if(result.Succeeded) {
+        //            return Ok();
+        //        }
+        //        else {
+        //            return BadRequest();
+        //        }
+        //    }
+        //    catch(Exception ex) {
+        //        this._logger.LogError("Delete user error:" + ex.Message);
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //}
+
+        //[Authorize(Roles = "Admin")]
+        //[HttpGet("{username}")]
+        //public async Task<IActionResult> Get(string userName) {
+        //    ApplicationUser result = _authService.GetByUsername(userName);
+        //    if(result == null) {
+        //        return BadRequest();
+        //    }
+        //    return Ok(Convert(result));
+        //}
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet("by-id/{Id:guid}")]
+        [HttpGet("{Id:guid}")]
+        public async Task<IActionResult> Get(Guid Id) {
+            try {
+                this._logger.LogInformation("Get user by id request:" + Id);
+
+                if(Guid.Empty == Id) {
+                    return BadRequest();
+                }
+                ApplicationUser result = await _userManager.FindByIdAsync(Id.ToString());
+
+                if(result == null) {
+                    return BadRequest();
+                }
+                return Ok(Convert(result));
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Get user by id error:" + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Gets() {
+            // gets all aspnetusers
+            try {
+                this._logger.LogInformation("Get users request:");
+
+                List<UserResponse> usersResponses = Convert(await _userManager.Users.Include(u => u.ApplicationUserRoles).ThenInclude(ur => ur.ApplicationRole).AsNoTracking().ToListAsync());
+                return Ok(usersResponses);
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Get all user error:" + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles() {
+            // gets all Roles.
+            try {
+                this._logger.LogInformation("Geting all user roles");
+
+
+                List<string> roles = await this._authService.GetRoles();
+                return Ok(roles);
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Get all user roles name error:" + ex.Message);
+
+                return BadRequest();
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest) {
+            try {
+                if(ModelState.IsValid) {
+
+                    _logger.LogInformation("Login request by user: " + loginRequest.Email);
+
+                    ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
+
+                    if(user == null) {
+                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists");
+                        return BadRequest();
+                    }
+
+                    var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
+
+                    if(!result.Succeeded) {
+                        _logger.LogWarning("User failed login: " + loginRequest.Email);
+                        return BadRequest();
+                    }
+                    _logger.LogInformation("User " + loginRequest.Email + " login successfully");
+
+                    var roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+                    List<Claim> claims = new List<Claim>();
+                    claims.Add(new Claim(ClaimTypes.Name, loginRequest.Email));
+                    foreach(var role in roles) {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
+
+                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._jwtSettings.SecurityKey));
+                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                    var expiry = DateTime.Now.AddMinutes(System.Convert.ToInt32(this._jwtSettings.ExpiresInMinutes));
+
+                    var token = new JwtSecurityToken(
+                        _jwtSettings.Issuer,
+                        _jwtSettings.Audience,
+                        claims,
+                        expires: expiry,
+                        signingCredentials: creds
+                    );
+                    string t = new JwtSecurityTokenHandler().WriteToken(token);
+                    return Ok(new TokenResponse() { Token = t, Expires = expiry });
+                }
+                return BadRequest();               
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Login error: " + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
+            try {
+                if(ModelState.IsValid) {
+                    var user = new ApplicationUser {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = request.Nickname,
+                        Surname = request.Surname,
+                        Name = request.Name,
+                        Email = request.Email,
+                        EmailConfirmed = false,
+                        IsDeleted = false,
+                        NewsletterEnabled = request.NewsletterEnabled,
+                        NewsletterEnableDate = request.NewsletterEnabled ? DateTime.UtcNow : DateTime.MinValue,
+                        Country = request.Country,
+                        BirthDate = request.BirthDate,
+                        Affiliation = request.Affiliation,  
+                        PhoneNumber = request.PhoneNumber
+                    };
+
+                    // create user.
+                    var result = await _userManager.CreateAsync(user, request.Password);
+                    if(!result.Succeeded) {
+                        _logger.LogWarning("Registration process failed: " + string.Join(";", result.Errors.Select(e => "Code: " + e.Code + " Description" + e.Description)));
+                        return BadRequest();
+                    }
+                    _logger.LogInformation("User " + request.Email + " was registered");
+                    // assign user role.
+                    await _userManager.AddToRolesAsync(user, new List<string> { "User" });
+
+                    // generate confirm token.
+                    string confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    // send mail.
+                    await _mailService.SendEmail(
+                        new List<string> { request.Email },
+                        "Confirm Account", "ConfirmAccount",
+                        new ConfirmAccount() {
+                            Name = request.Name,
+                            Surname = request.Surname,
+                            Token = confirmToken
+                        });
+                    return Ok(result);
+                }
+                else {
+                    return BadRequest();
+                }
+            }
+            catch(Exception ex) {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
+
+
+
+
+        //[AllowAnonymous]
+        //[HttpPost("[action]")]
+        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model) {
+        //    try {
+        //        _logger.LogInformation("Richiesto reset password");
+        //        if(ModelState.IsValid) {
+        //            var user = await _userManager.FindByNameAsync(model.UserName);
+        //            if(user == null) {
+        //                _logger.LogInformation("Utente " + model.UserName + " non trovato");
+        //                return NotFound();
+        //            }
+        //            // generate password.
+        //            string password = _authService.GenerateRandomPassword();
+        //            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        //            var res = await _userManager.ResetPasswordAsync(user, token, password);
+        //            if(res.Succeeded) {
+        //                await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = model.UserName });
+        //                _logger.LogInformation("La password é stata reimpostata");
+        //                return Ok(); // return ok to not give information.
+        //            }
+        //            else {
+        //                _logger.LogError("errore reset password");
+        //                return Ok(); // return ok to not give information.
+        //            }
+        //        }
+        //        else {
+        //            _logger.LogError("errore reset password");
+        //            return Ok(); // return ok to not give information.
+        //        }
+        //    }
+        //    catch(Exception ex) {
+        //        _logger.LogError(ex.Message);
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //}
+
+        //[Authorize(Roles = "Admin")]
+        //[HttpPut]
+        //public async Task<IActionResult> Put([FromBody] AspNetUserResponse aspNetUser) {
+
+        //    try {
+        //        if(ModelState.IsValid) {
+
+        //            ApplicationUser applicationUser = await _userManager.FindByNameAsync(aspNetUser.UserName);
+        //            if(applicationUser == null) {
+        //                return BadRequest("Username inesistente!");
+        //            }
+        //            // update fields.
+        //            applicationUser.Surname = aspNetUser.Surname;
+        //            applicationUser.Name = aspNetUser.Name;
+        //            applicationUser.PhoneNumber = aspNetUser.PhoneNumber;
+        //            applicationUser.Email = aspNetUser.Email;
+
+        //            var result = await _userManager.UpdateAsync(applicationUser);
+
+        //            if(result.Succeeded) {
+        //                var previousRoles = await _userManager.GetRolesAsync(applicationUser);
+        //                await _userManager.RemoveFromRolesAsync(applicationUser, previousRoles);
+        //                await _userManager.AddToRolesAsync(applicationUser, aspNetUser.Roles);
+        //                return Ok();
+        //            }
+        //        }
+        //        return BadRequest();
+        //    }
+        //    catch(Exception ex) {
+        //        this._logger.LogError("Edit User error:" + ex.Message);
+        //        return StatusCode(StatusCodes.Status500InternalServerError);
+        //    }
+        //}
+
+
+        #region CONVERT
+
+        private static UserResponse Convert(ApplicationUser user) {
+            UserResponse u = new UserResponse() {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Surname,
+                Surname = user.Surname,
+                Nickname = user.UserName,
+                Affiliation = user.Affiliation,
+                BirthDate = user.BirthDate,
+                Country = user.Country,
+                Newsletter = user.NewsletterEnabled,
+                PhoneNumber = user.PhoneNumber,
+            };
+            return u;
+        }
+
+        private static List<UserResponse> Convert(List<ApplicationUser> users) {
+            List<UserResponse> result = new List<UserResponse>();
+            foreach(ApplicationUser user in users) {
+                result.Add(Convert(user));
+            }
+            return result;
+        }
+
+        #endregion
+    }
+
+}

@@ -1,0 +1,22 @@
+@model jjodel_persistence.Models.Mail.ConfirmAccount
+<h2>
+    Conferma Account
+</h2>
+<p>
+    Ciao @Model.Name @Model.Surname,
+    <br />
+    <br/>
+    Per confermare il tuo account è sufficiente cliccare: 
+    Grazie per esserti registrato/a a Jjodel.io. Per favore, conferma il tuo account cliccando sul link qui sotto:
+
+    <a href="https://jjodel.io/api/account/confirm/@Model.Id/@Model.Token">qui</a>
+
+    Se non hai creato questo account, ignora questa email.
+
+    <br />
+    <br />
+    Un saluto,
+    <br />
+    Il team di Jjodel
+
+</p>
