@@ -12,20 +12,20 @@ namespace jjodel_persistence.Services {
     public class AuthService {
 
         private readonly Identity _identitySettings;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private ApplicationDbContext _context;
+        //private readonly UserManager<ApplicationUser> _userManager;
+        //private ApplicationDbContext _context;
 
 
         public AuthService(
-            IOptions<Identity> identitySettings,
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager
+            IOptions<Identity> identitySettings
+            //ApplicationDbContext context,
+            //UserManager<ApplicationUser> userManager
 
             )
         {
             this._identitySettings = identitySettings.Value;
-            this._userManager = userManager;
-            this._context = context;
+            //this._userManager = userManager;
+            //this._context = context;
 
         }
 
@@ -53,9 +53,9 @@ namespace jjodel_persistence.Services {
 
 
         #region Roles
-        public async Task<List<string>> GetRoles() {
-            return await this._context.Roles.Select(r => r.Name).ToListAsync();
-        }
+        //public async Task<List<string>> GetRoles() {
+        //    return await this._context.Roles.Select(r => r.Name).ToListAsync();
+        //}
 
         #endregion
 

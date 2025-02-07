@@ -13,7 +13,8 @@ using jjodel_persistence.Models.Settings;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace jjodel_persistence.Controllers {
+
+namespace jjodel_persistence.Controllers.API {
     [Route("api/[controller]")]
     [Route("api")]
     [ApiController]
@@ -94,7 +95,7 @@ namespace jjodel_persistence.Controllers {
         //    }
         //}
 
-        [AllowAnonymous]    
+        [AllowAnonymous]
         [HttpPost("confirm")]
         public async Task<IActionResult> Confirm([FromBody] ConfirmAccountRequest confirmAccountRequest) {
             try {
@@ -129,7 +130,7 @@ namespace jjodel_persistence.Controllers {
                     this._logger.LogInformation("Changing Password: " + changePasswordRequest.UserName);
 
                     var user = await _userManager.FindByNameAsync(changePasswordRequest.UserName);
-                    if(user == null || !(await _userManager.IsEmailConfirmedAsync(user))) {
+                    if(user == null || !await _userManager.IsEmailConfirmedAsync(user)) {
                         this._logger.LogInformation("User does not exists or is not confirmed: " + changePasswordRequest.UserName);
 
                         return BadRequest();
@@ -151,27 +152,37 @@ namespace jjodel_persistence.Controllers {
             }
         }
 
-        //[Authorize(Roles = "Admin")]
-        //[HttpDelete("{username}")]
-        //public async Task<IActionResult> Delete(string username) {
-        //    try {
-        //        var user = await _userManager.FindByNameAsync(username);
-        //        if(user == null) {
-        //            return BadRequest();
-        //        }
-        //        var result = await _userManager.DeleteAsync(user);
-        //        if(result.Succeeded) {
-        //            return Ok();
-        //        }
-        //        else {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch(Exception ex) {
-        //        this._logger.LogError("Delete user error:" + ex.Message);
-        //        return StatusCode(StatusCodes.Status500InternalServerError);
-        //    }
-        //}
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{Id:guid}")]
+        public async Task<IActionResult> Delete(Guid Id) {
+            try {
+                this._logger.LogInformation("Delete user by id:" + Id);
+
+                if(Guid.Empty == Id) {
+                    return BadRequest();
+                }
+
+                ApplicationUser user = await _userManager.FindByIdAsync(Id.ToString());
+                if(user == null) {
+                    return BadRequest();
+                }
+                
+                user.DeletionDate = DateTime.UtcNow;
+                user.IsDeleted = true;
+                var result = await _userManager.UpdateAsync(user);
+
+                if(result.Succeeded) {
+                    return Ok();
+                }
+               
+                return BadRequest();
+                
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Delete user error:" + ex.Message);
+                return BadRequest();
+            }
+        }
 
         //[Authorize(Roles = "Admin")]
         //[HttpGet("{username}")]
@@ -209,11 +220,36 @@ namespace jjodel_persistence.Controllers {
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Gets() {
+            // gets all aspnetusers not deleted
+            try {
+                this._logger.LogInformation("Get users request.");
+
+                List<UserResponse> usersResponses = Convert(await _userManager.
+                    Users.
+                    Where(u => !u.IsDeleted).
+                    Include(u => u.ApplicationRoles).
+                    AsNoTracking().
+                    ToListAsync());
+                return Ok(usersResponses);
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Get all user error:" + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllUsers() {
             // gets all aspnetusers
             try {
-                this._logger.LogInformation("Get users request:");
+                this._logger.LogInformation("Get users request.");
 
-                List<UserResponse> usersResponses = Convert(await _userManager.Users.Include(u => u.ApplicationUserRoles).ThenInclude(ur => ur.ApplicationRole).AsNoTracking().ToListAsync());
+                List<UserResponse> usersResponses = Convert(await _userManager.
+                    Users.
+                    Include(u => u.ApplicationRoles).
+                    AsNoTracking().
+                    ToListAsync());
                 return Ok(usersResponses);
             }
             catch(Exception ex) {
@@ -229,13 +265,11 @@ namespace jjodel_persistence.Controllers {
             try {
                 this._logger.LogInformation("Geting all user roles");
 
-
-                List<string> roles = await this._authService.GetRoles();
+                List<string> roles = await this._roleManager.Roles.Select(r => r.Name).ToListAsync();
                 return Ok(roles);
             }
             catch(Exception ex) {
                 this._logger.LogError("Get all user roles name error:" + ex.Message);
-
                 return BadRequest();
             }
         }
@@ -250,8 +284,8 @@ namespace jjodel_persistence.Controllers {
 
                     ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
 
-                    if(user == null) {
-                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists");
+                    if(user == null || user.IsDeleted) {
+                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists or is deleted.");
                         return BadRequest();
                     }
 
@@ -285,7 +319,7 @@ namespace jjodel_persistence.Controllers {
                     string t = new JwtSecurityTokenHandler().WriteToken(token);
                     return Ok(new TokenResponse() { Token = t, Expires = expiry });
                 }
-                return BadRequest();               
+                return BadRequest();
             }
             catch(Exception ex) {
                 this._logger.LogError("Login error: " + ex.Message);
@@ -310,7 +344,7 @@ namespace jjodel_persistence.Controllers {
                         NewsletterEnableDate = request.NewsletterEnabled ? DateTime.UtcNow : DateTime.MinValue,
                         Country = request.Country,
                         BirthDate = request.BirthDate,
-                        Affiliation = request.Affiliation,  
+                        Affiliation = request.Affiliation,
                         PhoneNumber = request.PhoneNumber
                     };
 
@@ -387,42 +421,53 @@ namespace jjodel_persistence.Controllers {
         //    }
         //}
 
-        //[Authorize(Roles = "Admin")]
-        //[HttpPut]
-        //public async Task<IActionResult> Put([FromBody] AspNetUserResponse aspNetUser) {
+        [Authorize(Roles = "Admin, User")]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateUserRequest updateUserRequest) {
 
-        //    try {
-        //        if(ModelState.IsValid) {
+            try {
+                if(ModelState.IsValid) {
+                    this._logger.LogInformation("Edit user request:" + updateUserRequest.Id);
 
-        //            ApplicationUser applicationUser = await _userManager.FindByNameAsync(aspNetUser.UserName);
-        //            if(applicationUser == null) {
-        //                return BadRequest("Username inesistente!");
-        //            }
-        //            // update fields.
-        //            applicationUser.Surname = aspNetUser.Surname;
-        //            applicationUser.Name = aspNetUser.Name;
-        //            applicationUser.PhoneNumber = aspNetUser.PhoneNumber;
-        //            applicationUser.Email = aspNetUser.Email;
+                    ApplicationUser user = await _userManager.FindByIdAsync(updateUserRequest.Id);
+                    if(user == null || user.IsDeleted) {
+                        _logger.LogWarning("User: " + updateUserRequest.Id + " does not exists or is deleted.");
 
-        //            var result = await _userManager.UpdateAsync(applicationUser);
+                        return BadRequest();
+                    }
+                    // update fields.
+                    user.Surname = updateUserRequest.Surname;
+                    user.Name = updateUserRequest.Name;
+                    user.UserName = updateUserRequest.Nickname;
+                    user.Affiliation = updateUserRequest.Affiliation;
+                    user.Country = updateUserRequest.Country;
+                    user.PhoneNumber = updateUserRequest.PhoneNumber;
+                    user.Email = updateUserRequest.Email;
+                    user.PhoneNumber = updateUserRequest.PhoneNumber;
+                    user.BirthDate = updateUserRequest.BirthDate;
+                    if(user.NewsletterEnabled != updateUserRequest.Newsletter ) {
+                        user.NewsletterEnabled = updateUserRequest.Newsletter;
+                        if(updateUserRequest.Newsletter) {
+                            user.NewsletterEnableDate = DateTime.Now;
+                        }
+                    }
 
-        //            if(result.Succeeded) {
-        //                var previousRoles = await _userManager.GetRolesAsync(applicationUser);
-        //                await _userManager.RemoveFromRolesAsync(applicationUser, previousRoles);
-        //                await _userManager.AddToRolesAsync(applicationUser, aspNetUser.Roles);
-        //                return Ok();
-        //            }
-        //        }
-        //        return BadRequest();
-        //    }
-        //    catch(Exception ex) {
-        //        this._logger.LogError("Edit User error:" + ex.Message);
-        //        return StatusCode(StatusCodes.Status500InternalServerError);
-        //    }
-        //}
+                    var result = await _userManager.UpdateAsync(user);
+
+                    if(result.Succeeded) {                        
+                        return Ok();
+                    }
+                }
+                return BadRequest();
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Edit User error:" + ex.Message);
+                return BadRequest();
+            }
+        }
 
 
-        #region CONVERT
+        #region Convert
 
         private static UserResponse Convert(ApplicationUser user) {
             UserResponse u = new UserResponse() {

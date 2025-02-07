@@ -36,7 +36,13 @@ namespace jjodel_persistence.Models.Entity {
         [NotMapped]
         public string FullName { get { return this.Surname + " " + this.Name; } }
 
-        public ICollection<ApplicationUserRole> ApplicationUserRoles { get; set; }
-        
+        public ICollection<ApplicationRole> ApplicationRoles { get; set; }
+
+        [InverseProperty("Author")]
+        public ICollection<Project> Author { get; set; }
+
+        //[InverseProperty("AuthorId")]
+        public ICollection<Project> Collaborators { get; set; } // collaborate to many projects
+
     }
 }

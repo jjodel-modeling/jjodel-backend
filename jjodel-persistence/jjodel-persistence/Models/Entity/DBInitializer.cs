@@ -39,7 +39,10 @@ namespace jjodel_persistence.Models.Entity {
                     PhoneNumber = "3458793739",
                     Name = "Andrea",
                     Surname = "Perelli",
-                    
+                    Affiliation = "Univaq",
+                    Country = "Italy",
+                    BirthDate = DateTime.UtcNow,
+                    NewsletterEnabled = true,
                 };
 
                 _userManager.CreateAsync(admin, "Admin123*").GetAwaiter().GetResult();
@@ -52,8 +55,11 @@ namespace jjodel_persistence.Models.Entity {
                     EmailConfirmed = true,
                     PhoneNumber = "3458793739",
                     Name = "Andrea",
-                    Surname = "Perelli"
-
+                    Surname ="Perelli",
+                    Affiliation = "Univaq",
+                    Country = "Italy",
+                    BirthDate = DateTime.UtcNow,
+                    NewsletterEnabled = true
                 };
 
                 _userManager.CreateAsync(user, "Admin123*").GetAwaiter().GetResult();

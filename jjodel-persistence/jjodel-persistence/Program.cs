@@ -4,6 +4,9 @@ using jjodel_persistence.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,14 +40,33 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
    .AddEntityFrameworkStores<ApplicationDbContext>()
    .AddDefaultTokenProviders();
 
+builder.Services.AddAuthentication(
+    options => {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+     .AddJwtBearer(options => {
+         options.TokenValidationParameters = new TokenValidationParameters {
+             ValidateIssuer = true,
+             ValidateAudience = true,
+             ValidateLifetime = true,
+             ValidateIssuerSigningKey = true,
+             ValidIssuer = builder.Configuration["Jwt:Issuer"],
+             ValidAudience = builder.Configuration["Jwt:Audience"],
+             IssuerSigningKey = new SymmetricSecurityKey(
+                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecurityKey"]))
+         };
+     });
+
 // services
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
 builder.Services.AddScoped<SignInManager<ApplicationUser>>();
 builder.Services.AddScoped<RoleManager<ApplicationRole>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MailService>();
+builder.Services.AddScoped<ProjectService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews(); // add api and MVC
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -81,16 +103,22 @@ else {
 }
 
 app.UseHttpsRedirection();
+
+// must be before use auth.
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
+// global cors policy
+app.UseCors(x => x
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 app.UseSerilogRequestLogging();
-
-
-
-app.Run();
 
 #if DEBUG
 
@@ -109,6 +137,10 @@ using(var scope = app.Services.CreateScope()) {
     db.Initialize();
 }
 #endif
+
+app.Run();
+
+
 /*
  *  1) User postgres; Password=postgres; Port=5432; Database=jjodel;
  */
