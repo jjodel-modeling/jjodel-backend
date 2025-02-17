@@ -1,0 +1,114 @@
+﻿@model List<jjodel_persistence.Models.Entity.Project>
+
+
+
+
+<div class="row">
+    <table id="example" class="table table-bordered table-responsive table-hover" style="width:100%">
+        <caption>All Users</caption>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>State</th>
+                <th>Creation</th>
+                <th>LastModified</th>
+                <th>AuthorId</th>
+                <th>Number of Collaborator</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                   
+                  
+                    <td>@project.Name</td>
+                    <td>@project.Description</td>
+                    <td>@project.Type</td>
+                    <td>@project.State</td>
+                    <td>@project.Creation</td>
+                    <td>@project.LastModified</td>
+                    <td>@project.AuthorId</td>
+                    <td>@project.Collaborators?.Count</td>
+                    
+
+
+                    <td>
+                        <div class="d-grid gap-2 d-flex justify-content-center">
+                            <button class="btn btn-primary editUserBtn">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger deleteUserBtn">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>State</th>
+                <th>Creation</th>
+                <th>LastModified</th>
+                <th>AuthorId</th>
+                <th>Number of Collaborator</th>
+                <th>Options</th>
+
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+        let table = new DataTable("#example", {
+
+            layout: {
+                top1Start: {
+                    buttons: [
+                        {
+                            extend: "copy",
+                            text: '<i class="bi bi-clipboard"></i> Copy',
+                            className: "btn btn-secondary"
+                        },
+                        {
+                            extend: "csv",
+                            text: '<i class="bi bi-file-earmark-spreadsheet"></i> CSV',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "excel",
+                            text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "pdf",
+                            text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                            className: "btn btn-danger"
+                        },
+                        {
+                            extend: "print",
+                            text: '<i class="bi bi-printer"></i> Print',
+                            className: "btn btn-primary"
+                        }
+                    ]
+                }
+            }
+        });
+
+
+    });
+
+
+
+
+</script>

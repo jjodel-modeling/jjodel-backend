@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 namespace jjodel_persistence.Models.Entity {
 
     public class ApplicationRole : IdentityRole {
-        public ICollection<ApplicationUser> ApplicationUsers { get; set; }
+        public ICollection<ApplicationUserRole> ApplicationUsers { get; set; }
     }
 }

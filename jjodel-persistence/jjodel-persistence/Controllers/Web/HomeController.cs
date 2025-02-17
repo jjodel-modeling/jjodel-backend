@@ -14,6 +14,8 @@ namespace jjodel_persistence.Controllers.Web {
 
         [HttpGet]
         public IActionResult Index() {
+            
+            
             return View();
         }
     }

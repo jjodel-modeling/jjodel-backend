@@ -12,7 +12,7 @@ using jjodel_persistence.Models.Entity;
 namespace jjodel_persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250207164348_first")]
+    [Migration("20250217180642_first")]
     partial class first
     {
         /// <inheritdoc />

@@ -122,7 +122,7 @@ namespace jjodel_persistence.Controllers.API {
             }
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin, User")]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest) {
             try {
@@ -135,6 +135,7 @@ namespace jjodel_persistence.Controllers.API {
 
                         return BadRequest();
                     }
+
                     else {
                         var res = await _userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.Password);
                         if(res.Succeeded) {
@@ -300,7 +301,7 @@ namespace jjodel_persistence.Controllers.API {
                     var roles = await _signInManager.UserManager.GetRolesAsync(user);
 
                     List<Claim> claims = new List<Claim>();
-                    claims.Add(new Claim(ClaimTypes.Name, loginRequest.Email));
+                    claims.Add(new Claim(ClaimTypes.Name, user.UserName));
                     foreach(var role in roles) {
                         claims.Add(new Claim(ClaimTypes.Role, role));
                     }
@@ -331,7 +332,7 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             try {
-                if(ModelState.IsValid) {
+                if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
                         UserName = request.Nickname,
@@ -377,7 +378,7 @@ namespace jjodel_persistence.Controllers.API {
                 }
             }
             catch(Exception ex) {
-                _logger.LogError(ex.Message);
+                this._logger.LogError("Register error: " + ex.Message);
                 return BadRequest();
             }
         }
@@ -385,41 +386,40 @@ namespace jjodel_persistence.Controllers.API {
 
 
 
-        //[AllowAnonymous]
-        //[HttpPost("[action]")]
-        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model) {
-        //    try {
-        //        _logger.LogInformation("Richiesto reset password");
-        //        if(ModelState.IsValid) {
-        //            var user = await _userManager.FindByNameAsync(model.UserName);
-        //            if(user == null) {
-        //                _logger.LogInformation("Utente " + model.UserName + " non trovato");
-        //                return NotFound();
-        //            }
-        //            // generate password.
-        //            string password = _authService.GenerateRandomPassword();
-        //            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        //            var res = await _userManager.ResetPasswordAsync(user, token, password);
-        //            if(res.Succeeded) {
-        //                await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = model.UserName });
-        //                _logger.LogInformation("La password é stata reimpostata");
-        //                return Ok(); // return ok to not give information.
-        //            }
-        //            else {
-        //                _logger.LogError("errore reset password");
-        //                return Ok(); // return ok to not give information.
-        //            }
-        //        }
-        //        else {
-        //            _logger.LogError("errore reset password");
-        //            return Ok(); // return ok to not give information.
-        //        }
-        //    }
-        //    catch(Exception ex) {
-        //        _logger.LogError(ex.Message);
-        //        return StatusCode(StatusCodes.Status500InternalServerError);
-        //    }
-        //}
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest) {
+            try {
+                this._logger.LogInformation("Richiesto reset password");
+                if (ModelState.IsValid) {
+                    var user = await _userManager.FindByNameAsync(resetPasswordRequest.Nickname);
+                    if (user == null) {
+                        _logger.LogInformation("User " + resetPasswordRequest.Nickname + " not found");
+                        return BadRequest();
+                    }
+                    // generate password.
+                    string password = _authService.GenerateRandomPassword();
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await _userManager.ResetPasswordAsync(user, token, password);
+
+                    if (!result.Succeeded) {
+
+                        this._logger.LogWarning("Password reset failed for user " + user.UserName);
+                        return BadRequest();
+                    }
+                        await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
+                        this._logger.LogInformation("The password has been reset");
+                        return Ok(); 
+                    
+                }
+
+                return BadRequest();
+            }
+            catch (Exception ex) {
+                this._logger.LogError("Reset error: " + ex.Message);
+                return BadRequest();
+            }
+        }
 
         [Authorize(Roles = "Admin, User")]
         [HttpPut]
@@ -435,6 +435,15 @@ namespace jjodel_persistence.Controllers.API {
 
                         return BadRequest();
                     }
+
+                    // unique email verification  
+                    var existingUser = await this._userManager.FindByEmailAsync(updateUserRequest.Email);
+                    if(existingUser != null && existingUser.Id != updateUserRequest.Id) {
+                        this._logger.LogWarning(updateUserRequest.Id + " is attempting to update the email of " + existingUser.Id);
+                        return BadRequest();
+
+                    }
+
                     // update fields.
                     user.Surname = updateUserRequest.Surname;
                     user.Name = updateUserRequest.Name;
@@ -461,7 +470,7 @@ namespace jjodel_persistence.Controllers.API {
                 return BadRequest();
             }
             catch(Exception ex) {
-                this._logger.LogError("Edit User error:" + ex.Message);
+                this._logger.LogError("Edit User error: " + ex.Message);
                 return BadRequest();
             }
         }

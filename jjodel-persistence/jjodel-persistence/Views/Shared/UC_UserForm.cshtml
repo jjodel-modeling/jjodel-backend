@@ -1,0 +1,82 @@
+﻿@* @model jjodel_persistence.Models.Dto.UpdateUserRequest 
+ *@
+ @model jjodel_persistence.Models.Entity.ApplicationUser 
+
+<form id="editUserForm" method="POST" >
+    @Html.AntiForgeryToken() <!-- Token Anti CSRF -->
+    @Html.HiddenFor(i => i.Id)
+
+    <div class="mb-3">
+        <label class="form-label">Nickname</label>
+        <input type="text" class="form-control" id="Nickname" name="Nickname" value="@Model.UserName" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" id="editName" name="Name" value="@Model.Name" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Surname</label>
+        <input type="text" class="form-control" id="editSurname" name="Surname" value="@Model.Surname"  required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="editEmail" name="Email" value="@Model.Email" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Country</label>
+        <input type="text" class="form-control" id="editCountry" name="Country" value="@Model.Country"  required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">BirthDate</label>
+        <input type="date" class="form-control" id="editBirthDate" name="BirthDate" value="@Model.BirthDate" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="text" class="form-control" id="editPhoneNumber" name="PhoneNumber" value="@Model.PhoneNumber">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Affiliation</label>
+        <input type="text" class="form-control" id="editAffiliation" name="Affiliation" value="@Model.Affiliation">
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+</form>
+
+@section Scripts {
+ 
+    <script>
+            document.getElementById("editUserForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            Submit();
+        });
+
+        function Submit() {
+            let form = document.getElementById("editUserForm");
+            let formData = new FormData(form);
+            let token = document.querySelector('input[name="__RequestVerificationToken"]').value; 
+
+            formData.append("__RequestVerificationToken", token);
+
+            fetch("/Account/Update", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; 
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        };
+
+
+    </script>
+
+ }

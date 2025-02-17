@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace jjodel_persistence.Models.Entity {
     public class ApplicationDbContext :
         IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>,
-        IdentityUserRole<string>, IdentityUserLogin<string>,
+        ApplicationUserRole, IdentityUserLogin<string>,
         IdentityRoleClaim<string>, IdentityUserToken<string>> {
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
@@ -14,6 +14,23 @@ namespace jjodel_persistence.Models.Entity {
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
 
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder) {
+            base.OnModelCreating(builder);
+
+            // MANY TO MANY.
+            builder.Entity<ApplicationUserRole>(userRole => {
+                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+                userRole.HasOne(ur => ur.Role)
+                    .WithMany(r => r.ApplicationUsers)
+                    .HasForeignKey(ur => ur.RoleId);
+
+                userRole.HasOne(ur => ur.User)
+                    .WithMany(r => r.ApplicationRoles)
+                    .HasForeignKey(ur => ur.UserId);
+            });
         }
     }
 }

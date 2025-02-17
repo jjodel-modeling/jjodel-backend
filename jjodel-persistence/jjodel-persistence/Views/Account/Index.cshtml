@@ -1,0 +1,151 @@
+﻿@model List<jjodel_persistence.Models.Entity.ApplicationUser>
+
+
+
+<div class="row">
+    <table id="example" class="table table-bordered table-responsive table-hover" style="width:100%">
+        <caption>All Users</caption>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Nickname</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Country</th>
+                <th>BirthDate</th>
+                <th>Phone Number</th>
+                <th>Affiliation</th>
+                <th>Created Projects</th>
+                <th>Collaborate to</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    @{
+                        string color = "red";
+                        if (user.NewsletterEnabled) {
+
+                            color = "blue";
+                        }
+                    }
+                    @{
+                        string enableNewsLetter = "newsletter enabled"; 
+                        if(user.NewsletterEnabled != true) {
+                            enableNewsLetter = "newsletter disabled";
+                        }
+                    }
+                    <td title="@enableNewsLetter" style="background-color: @color; width:2px; min-width: 1px!important;"></td>
+                    <td >@user.UserName</td>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@user.Email</td>
+                    <td>@user.Country</td>
+                    <td>@user.BirthDate.ToShortDateString()</td>
+                    <td>@user.PhoneNumber</td>
+                    <td>@user.Affiliation</td>
+                    <td>@user.Author?.Count</td>
+                    <td>@user.Collaborators?.Count</td>
+
+                    <td>
+                        <div class="d-grid gap-2 d-flex justify-content-center">
+                            <button class="btn btn-primary editUserBtn" onclick="EditUser('@user.Id')">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger deleteUserBtn">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <th></th>
+                <th>Nickname</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Country</th>
+                <th>BirthDate</th>
+                <th>Phone Number</th>
+                <th>Affiliation</th>
+                <th>Created Projects</th>
+                <th>Collaborate to</th>
+                <th>Options</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Modale per la modifica dell'utente -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+ <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        let table = new DataTable("#example", {
+
+            layout: {
+                top1Start: {
+                    buttons: [
+                        {
+                            extend: "copy",
+                            text: '<i class="bi bi-clipboard"></i> Copy',
+                            className: "btn btn-secondary"
+                        },
+                        {
+                            extend: "csv",
+                            text: '<i class="bi bi-file-earmark-spreadsheet"></i> CSV',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "excel",
+                            text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "pdf",
+                            text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                            className: "btn btn-danger"
+                        },
+                        {
+                            extend: "print",
+                            text: '<i class="bi bi-printer"></i> Print',
+                            className: "btn btn-primary"
+                        }
+                    ]
+                }
+            }
+        });
+
+       
+    });
+        function EditUser(id) {
+        fetch(`/Account/Edit/${id}`)
+            .then(response => response.text()) 
+            .then(data => {
+                document.getElementById("modal-body").innerHTML = data;
+                let editModal = new bootstrap.Modal(document.getElementById("editUserModal"));
+                editModal.show();
+            })
+            .catch(error => console.error("Errore nel recupero del contenuto della modale:", error));
+    }
+
+</script>

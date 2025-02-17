@@ -22,21 +22,6 @@ namespace jjodel_persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ApplicationRoleApplicationUser", b =>
-                {
-                    b.Property<string>("ApplicationRolesId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ApplicationUsersId")
-                        .HasColumnType("text");
-
-                    b.HasKey("ApplicationRolesId", "ApplicationUsersId");
-
-                    b.HasIndex("ApplicationUsersId");
-
-                    b.ToTable("ApplicationRoleApplicationUser");
-                });
-
             modelBuilder.Entity("ApplicationUserProject", b =>
                 {
                     b.Property<string>("CollaboratorsId")
@@ -122,21 +107,6 @@ namespace jjodel_persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -279,6 +249,21 @@ namespace jjodel_persistence.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationUserRole", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
             modelBuilder.Entity("jjodel_persistence.Models.Entity.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -330,21 +315,6 @@ namespace jjodel_persistence.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("ApplicationRoleApplicationUser", b =>
-                {
-                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationRole", null)
-                        .WithMany()
-                        .HasForeignKey("ApplicationRolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ApplicationUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ApplicationUserProject", b =>
                 {
                     b.HasOne("jjodel_persistence.Models.Entity.ApplicationUser", null)
@@ -387,21 +357,6 @@ namespace jjodel_persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.HasOne("jjodel_persistence.Models.Entity.ApplicationUser", null)
@@ -409,6 +364,25 @@ namespace jjodel_persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationUserRole", b =>
+                {
+                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationRole", "Role")
+                        .WithMany("ApplicationUsers")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("jjodel_persistence.Models.Entity.ApplicationUser", "User")
+                        .WithMany("ApplicationRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("jjodel_persistence.Models.Entity.Project", b =>
@@ -422,8 +396,15 @@ namespace jjodel_persistence.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationRole", b =>
+                {
+                    b.Navigation("ApplicationUsers");
+                });
+
             modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationUser", b =>
                 {
+                    b.Navigation("ApplicationRoles");
+
                     b.Navigation("Author");
                 });
 #pragma warning restore 612, 618

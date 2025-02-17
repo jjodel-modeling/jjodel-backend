@@ -1,8 +1,465 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+ <!--begin::Row-->
+<div class="row">
+    <!--begin::Col-->
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 1-->
+        <div class="small-box text-bg-primary h-75">
+            <div class="inner">
+                <h3>1500</h3>
+                <p><i class="bi bi-people"></i>  Total Users</p>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+            </div>  
+        </div>
+        <!--end::Small Box Widget 1-->
+    </div>
+    <!--end::Col-->
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 2-->
+        <div class="small-box text-bg-success h-75">
+            <div class="inner">
+                <h3>2000</h3>
+                <p><i class="bi bi-person-plus"></i> New Users Last Month</p>
+            </div>
+        </div>
+        <!--end::Small Box Widget 2-->
+    </div>
+    <!--end::Col-->
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 3-->
+        <div class="small-box text-bg-warning h-75">
+            <div class="inner">
+                <h3>10</h3>
+                <p><i class="bi bi-calendar-plus"></i> New Users Last Week</p>
+            </div>
+        </div>
+        <!--end::Small Box Widget 3-->
+    </div>
+    <!--end::Col-->
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 4-->
+        <div class="small-box text-bg-info h-75">
+            <div class="inner">
+                <h3>30</h3>
+                <p><i class="bi bi-person-check"></i> Active Users</p>
+            </div>          
+        </div>
+        <!--end::Small Box Widget 4-->
+    </div>
+    <!--end::Col-->
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 4-->
+        <div class="small-box text-bg-primary h-75">
+            <div class="inner">
+                <h3>3000</h3>
+                <p><i class="bi bi-folder"></i> Total Project</p>
+            </div>
+        </div>
+        <!--end::Small Box Widget 4-->
+    </div>
+    <div class="col-lg-2 col-6">
+        <!--begin::Small Box Widget 4-->
+        <div class="small-box text-bg-warning h-75">
+            <div class="inner">
+                <h3>3000</h3>
+                <p><i class="bi bi-folder-plus"></i> New Project Last Month</p>
+            </div>
+        </div>
+        <!--end::Small Box Widget 4-->
+    </div>
+    <!--end::Col-->
 </div>
+<!--end::Row-->
+<!--begin::Row-->
+<div class="row">
+
+    <div class="col-sm-6 col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">User Growth Overview</h5>
+            </div>
+            <div class="card-body">
+                <div id="user-growth-chart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Project Growth Overview</h5>
+            </div>
+            <div class="card-body">
+                <div id="project-growth-chart"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+   
+</div>
+<!--end::Row-->
+
+<div class="row">
+    <div class="col-sm-6 col-12">
+        <!-- /.info-box -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Affiliation</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-remove">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <!--begin::Row-->
+                <div class="row">
+                    <div class="col-12"><div id="pie-chart-1"></div></div>
+                    <!-- /.col -->
+                </div>
+                <!--end::Row-->
+            </div>
+            <!-- /.card-body -->
+       @*      <div class="card-footer p-0">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            United States of America
+                            <span class="float-end text-danger">
+                                <i class="bi bi-arrow-down fs-7"></i>
+                                12%
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            India
+                            <span class="float-end text-success">
+                                <i class="bi bi-arrow-up fs-7"></i> 4%
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            China
+                            <span class="float-end text-info">
+                                <i class="bi bi-arrow-left fs-7"></i> 0%
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div> *@
+            <!-- /.footer -->
+        </div>
+
+    </div>
+    <div class="col-sm-6 col-12">
+        <!-- /.info-box -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Country</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-remove">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <!--begin::Row-->
+                <div class="row">
+                    <div class="col-12"><div id="pie-chart-2"></div></div>
+                    <!-- /.col -->
+                </div>
+                <!--end::Row-->
+            </div>
+            <!-- /.card-body -->
+            @* <div class="card-footer p-0">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            United States of America
+                            <span class="float-end text-danger">
+                                <i class="bi bi-arrow-down fs-7"></i>
+                                12%
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            India
+                            <span class="float-end text-success">
+                                <i class="bi bi-arrow-up fs-7"></i> 4%
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            China
+                            <span class="float-end text-info">
+                                <i class="bi bi-arrow-left fs-7"></i> 0%
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div> *@
+            <!-- /.footer -->
+    </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Latest Project</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-remove">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table m-0">
+                        <thead>
+                            <tr>
+                                <th>Project ID</th>
+                                <th>Name</th>
+                                <th>State</th>
+                                <th>Last Modified</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a href="#"
+                                       class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">OR9842</a>
+                                </td>
+                                <td>Call of Duty IV</td>
+                                <td><span class="badge text-bg-success"> Shipped </span></td>
+                                @*                                 <td><div id="table-sparkline-1"></div></td>
+ *@                                <td></td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#"
+                                       class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">OR1848</a>
+                                </td>
+                                <td>Samsung Smart TV</td>
+                                <td><span class="badge text-bg-warning">Pending</span></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#"
+                                       class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">OR7429</a>
+                                </td>
+                                <td>iPhone 6 Plus</td>
+                                <td><span class="badge text-bg-danger"> Delivered </span></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#"
+                                       class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">OR7429</a>
+                                </td>
+                                <td>Samsung Smart TV</td>
+                                <td><span class="badge text-bg-info">Processing</span></td>
+                                <td></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer clearfix">
+                <a href="javascript:void(0)" class="btn btn-sm btn-primary float-start">
+                    Place New Project
+                </a>
+                <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-end">
+                    View All Project
+                </a>
+            </div>
+            <!-- /.card-footer -->
+        </div>
+        <!-- /.card -->
+    </div>
+  
+</div>
+
+<!--end::Row-->
+
+ <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
+            integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
+            crossorigin="anonymous"></script>
+ <script>
+
+    // Dati fittizi per gli utenti su 7 giorni
+    const days = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+
+    // Nuovi utenti
+    const newUsersData = [20, 35, 50, 65, 80, 95, 3];
+    // Utenti totali
+    const totalUsersData = [200, 220, 240, 260, 280, 300, 320];
+    // Utenti attivi
+    const activeUsersData = [100, 120, 140, 160, 180, 200, 220];
+
+    // Configurazione del grafico ApexCharts per utenti
+    const userOptions = {
+        series: [
+            { name: "New Users", data: newUsersData },
+            { name: "Total Users", data: totalUsersData },
+            { name: "Active Users", data: activeUsersData }
+        ],
+        chart: {
+            type: "line",
+            height: 350,
+            toolbar: { show: true }
+        },
+        stroke: {
+            width: 2,
+            curve: "smooth"
+        },
+        colors: ["#0d6efd", "#20c997", "#ffc107"], // Blu, Verde, Giallo
+        xaxis: {
+            categories: days,
+            title: { text: "Time (Days)" }
+        },
+        yaxis: {
+            title: { text: "Users" }
+        },
+        tooltip: {
+            shared: false, 
+            intersect: false
+        },
+        legend: {
+            // Posizione della legenda
+            position: "top",  
+            // Allineamento orizzontale (left, center, right)
+            horizontalAlign: "center",
+            // Sposta la legenda di 100px a sinistra
+            offsetX: -100,
+        }
+    };
+
+    // Nuovi Progetti
+    const newProjectData = [1, 5, 10, 15, 200, 30, 35];
+    // Progetti totali
+    const totalProjectData = [100, 120, 240, 260, 280, 300, 320];
+    // Progetti modificati
+    const activeProjectData = [50, 70, 80, 90, 110, 200, 290];
+
+    //     Rileva la larghezza dello schermo
+    // const isMobile = window.innerWidth < 768;
+
+    // Configurazione del grafico ApexCharts per progetti
+    const projectOptions = {
+        series: [
+            { name: "New Projects", data: newProjectData },
+            { name: "Total Projects", data: totalProjectData },
+            { name: "Modified Projects", data: activeProjectData }
+        ],
+        chart: {
+            type: "line",
+            height: 350,
+            toolbar: { show: true }
+        },
+        stroke: {
+            width: 2,
+            curve: "smooth"
+        },
+        // Blu, Verde, Giallo
+        colors: ["#0d6efd", "#20c997", "#ffc107"], 
+        xaxis: {
+            categories: days,
+            title: { text: "Time (Days)" }
+        },
+        yaxis: {
+            title: { text: "Projects" }
+        },
+        tooltip: {
+            shared: false, 
+            intersect: false
+        },
+        legend: {
+             // Posizione della legenda
+            position: "top",   
+            // Allineamento orizzontale (left, center, right)
+            horizontalAlign: "center",  
+            // Sposta la legenda di 100px a sinistra
+            offsetX: -100,  
+      
+        }
+    };
+
+    // Creazione del grafico per utenti
+    const userChart = new ApexCharts(document.querySelector("#user-growth-chart"), userOptions);
+    // Render
+    userChart.render();
+
+    // Creazione del grafico per progetti
+    const projectChart = new ApexCharts(document.querySelector("#project-growth-chart"), projectOptions);
+    // Render
+    projectChart.render();
+
+    
+
+        //-------------
+        // - PIE CHART -
+        //-------------
+
+        const pie_chart_options_1 = {
+          series: [700, 500, 400, 600],
+          chart: {
+            type: 'donut',
+            height:300
+          },
+          labels: ['CapoWeb', 'Univaq', 'CW', 'AQ'],
+          dataLabels: {
+            enabled: false,
+          },
+          colors: ['#0d6efd', '#20c997', '#ffc107', '#d63384'],
+        };
+
+        const pie_chart_1 = new ApexCharts(document.querySelector('#pie-chart-1'), pie_chart_options_1);
+        pie_chart_1.render();
+
+        const pie_chart_options_2 = {
+            series: [700, 500, 400, 600, 300, 100],
+            chart: {
+                type: 'donut',
+                height:300
+            },
+            labels: ['Italy', 'France', 'United States', 'Spain', 'Ireland', 'Germany'],
+            dataLabels: {
+                enabled: false,
+            },
+            colors: ['#0d6efd', '#20c997', '#ffc107', '#d63384', '#6f42c1', '#adb5bd'],
+        };
+
+        const pie_chart_2 = new ApexCharts(document.querySelector('#pie-chart-2'), pie_chart_options_2);
+        pie_chart_2.render();
+
+        //-----------------
+        // - END PIE CHART -
+        //-----------------
+  </script>

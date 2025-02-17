@@ -1,5 +1,4 @@
-﻿using jjodel_persistence.Models.Entity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace jjodel_persistence.Models.Dto {
     public class ProjectResponse {

@@ -40,17 +40,20 @@ namespace jjodel_persistence.Controllers.API {
                         Name = createProjectRequest.Name,
                         Description = createProjectRequest.Description,
                         Type = createProjectRequest.Type,
-                        Creation = DateTime.Now,
-                        LastModified = DateTime.Now,
+                        //Creation = DateTime.Now,
+                        //LastModified = DateTime.Now,
+                        Creation = DateTime.UtcNow,
+                        LastModified = DateTime.UtcNow,
                         State = "",
                         Author = await this._userManager.FindByNameAsync(User.Identity.Name),
+
                         ViewpointsNumber = 0,
                         MetamodelsNumber = 0,
                         ModelsNumber = 0,
                         IsFavorite = false,
                     };
                     if(await this._projectService.Add(project)) {
-                        return Ok(project);
+                        return Ok(Convert(project));
                     }
                 }
                 return BadRequest();

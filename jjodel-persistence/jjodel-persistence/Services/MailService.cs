@@ -33,7 +33,7 @@ namespace jjodel_persistence.Services {
         }
 
 
-        public async Task<bool> SendEmail(string from, List<string> to, string subjet, string templateName, object viewModel, string language) {
+        public async Task<bool> SendEmail(string from, List<string> to, string subject, string templateName, object viewModel, string language) {
             try {
                 // result.
                 SendResponse res = null;          
@@ -43,7 +43,7 @@ namespace jjodel_persistence.Services {
                     .SetFrom(from)
                     .To(this.Convert(to))
                     .BCC("a.perelli@capoweb.it") //TODO: remove.
-                    .Subject(subjet);
+                    .Subject(subject);
 
                 factory.UsingTemplateFromFile(
                     Directory.GetCurrentDirectory() + 
@@ -70,9 +70,9 @@ namespace jjodel_persistence.Services {
             return false;
         }
 
-        public async Task<bool> SendEmail(List<string> to, string subjet, string templateName, object viewModel) {
+        public async Task<bool> SendEmail(List<string> to, string subject, string templateName, object viewModel) {
 
-            return await this.SendEmail(_mailSettings.FromDefault, to, subjet, templateName, viewModel, "it");
+            return await this.SendEmail(_mailSettings.FromDefault, to, subject, templateName, viewModel, "it");
 
         }
 
