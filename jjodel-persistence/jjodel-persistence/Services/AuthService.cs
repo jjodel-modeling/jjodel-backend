@@ -57,6 +57,8 @@ namespace jjodel_persistence.Services {
         //    return await this._context.Roles.Select(r => r.Name).ToListAsync();
         //}
 
+        
+
         #endregion
 
 

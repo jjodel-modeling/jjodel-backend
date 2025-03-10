@@ -1,82 +1,92 @@
-﻿@* @model jjodel_persistence.Models.Dto.UpdateUserRequest 
- *@
- @model jjodel_persistence.Models.Entity.ApplicationUser 
+﻿ @model jjodel_persistence.Models.Entity.ApplicationUser
 
-<form id="editUserForm" method="POST" >
-    @Html.AntiForgeryToken() <!-- Token Anti CSRF -->
+
+<form id="editUserForm">
+    @Html.AntiForgeryToken()
     @Html.HiddenFor(i => i.Id)
 
-    <div class="mb-3">
-        <label class="form-label">Nickname</label>
-        <input type="text" class="form-control" id="Nickname" name="Nickname" value="@Model.UserName" required>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="Nickname" class="form-label">Nickname</label>
+                <input type="text" class="form-control" id="Nickname" name="UserName" value="@Model.UserName" required @(string.IsNullOrEmpty(Model.UserName)? "": "readonly")/>
+            </div>
+
+            <div class="col-md-6">
+                <label for="Name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required />
+                <span asp-validation-for="Name" id="Name-error" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label for="Surname" class="form-label">Surname</label>
+                <input type="text" class="form-control" id="Surname" name="Surname" value="@Model.Surname" required />
+                <span asp-validation-for="Surname" id="Surname-error" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label for="Email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required />                
+                <span asp-validation-for="Email" id="Email-error" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-md-6">
+                <label for="Country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="Country" name="Country" value="@Model.Country" required />
+                <span asp-validation-for="Country" id="Country-error" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label for="BirthDate" class="form-label">Birth Date</label>
+                <input type="date" class="form-control" id="BirthDate" name="BirthDate" value="@Model.BirthDate.ToString("yyyy-MM-dd")" required />
+                <span asp-validation-for="BirthDate" id="BirthDate-error" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-md-6">
+                <label for="PhoneNumber" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" value="@Model.PhoneNumber" />
+                <span asp-validation-for="PhoneNumber" id="PhoneNumber-error" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label for="Affiliation" class="form-label">Affiliation</label>
+                <input type="text" class="form-control" id="Affiliation" name="Affiliation" value="@Model.Affiliation" />
+                <span asp-validation-for="Affiliation" id="Affiliation-error" class="text-danger"></span>
+            </div>
+
+            <!-- Roles (Checkbox) -->
+            <div class="col-12">
+                <label class="form-label">User Roles</label>
+                <div class="form-check">
+                    @for (int i = 0; i < ViewBag.AllRoles.Count; i++) {
+                        var role = ViewBag.AllRoles[i]; 
+                        if(Model.ApplicationRoles != null && Model.ApplicationRoles.Count > 0){
+                            bool isChecked = Model.ApplicationRoles.Any(ur => ur.Role.Id == role.Id);
+
+                            <div class="form-check">
+                                <input class="form-check-input" name="ApplicationRoles[@i].RoleId" value="@role.Id" type="checkbox" @(isChecked ? "checked" : "")>
+
+                                <label class="form-check-label">@role.Name</label>
+                            </div>
+                        }
+                        else{
+                            <div class="form-check">
+                                <input class="form-check-input" name="ApplicationRoles[@i].RoleId" value="@role.Id" type="checkbox">
+
+                                <label class="form-check-label">@role.Name</label>
+                            </div>
+                        }
+                        
+                    }
+                    
+                </div>               
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-primary" type="button" onclick="SaveUser()" style="float: right;">Save Changes</button>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" id="editName" name="Name" value="@Model.Name" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Surname</label>
-        <input type="text" class="form-control" id="editSurname" name="Surname" value="@Model.Surname"  required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" id="editEmail" name="Email" value="@Model.Email" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Country</label>
-        <input type="text" class="form-control" id="editCountry" name="Country" value="@Model.Country"  required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">BirthDate</label>
-        <input type="date" class="form-control" id="editBirthDate" name="BirthDate" value="@Model.BirthDate" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Phone Number</label>
-        <input type="text" class="form-control" id="editPhoneNumber" name="PhoneNumber" value="@Model.PhoneNumber">
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Affiliation</label>
-        <input type="text" class="form-control" id="editAffiliation" name="Affiliation" value="@Model.Affiliation">
-    </div>
-
-    <button class="btn btn-primary" type="submit">Save Changes</button>
-</form>
-
-@section Scripts {
- 
-    <script>
-            document.getElementById("editUserForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            Submit();
-        });
-
-        function Submit() {
-            let form = document.getElementById("editUserForm");
-            let formData = new FormData(form);
-            let token = document.querySelector('input[name="__RequestVerificationToken"]').value; 
-
-            formData.append("__RequestVerificationToken", token);
-
-            fetch("/Account/Update", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url; 
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        };
-
-
-    </script>
-
- }
+</form> 

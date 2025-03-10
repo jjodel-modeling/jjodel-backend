@@ -120,7 +120,7 @@ namespace jjodel_persistence.Controllers.API {
                 this._logger.LogInformation("Get projects request.");
                 List<Project> projects = await this._projectService.GetByAuthor(User.Identity.Name);
 
-                return Ok(Convert(await this._projectService.Gets()));
+                return Ok(Convert(projects));
             }
             catch(Exception ex) {
                 this._logger.LogError(ex.ToString());
@@ -135,7 +135,7 @@ namespace jjodel_persistence.Controllers.API {
             try {
                 this._logger.LogInformation("Get all projects request.");
 
-                return Ok(Convert(await this._projectService.Gets()));
+                return Ok(Convert(await this._projectService.GetsAsNoTracking()));
             }
             catch(Exception ex) {
                 this._logger.LogError(ex.ToString());

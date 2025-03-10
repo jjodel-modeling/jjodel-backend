@@ -5,7 +5,7 @@
 <!--begin::Head-->
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>BackOffice Jjodel</title>
+    <title>@ViewBag.Title</title>
     <!--begin::Primary Meta Tags-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    
@@ -150,8 +150,26 @@
             padding:0.2rem!important;
             margin-top:0.4rem!important;
         }
+
+    .menu-hover:hover {
+        background-color: #f5f5f5 !important;
+        color: black!important;
+        font-weight:600!important;
+        cursor: pointer;
+    }
+
+    .input-hover:focus {
+        border-color: #007bff !important;
+        color: black !important;
+        font-weight: 600!important;
+       
+    }
+
+    .border-group-account {
+        border:none!important;
+    }
     
-</style>
+    </style>
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 
     <div class="app-wrapper">
@@ -186,7 +204,7 @@
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" style="padding-left:2px!important">
 
                             <span class="d-none d-md-inline bi bi-person-circle"></span>&nbsp;&nbsp;
-                            <span class="d-none d-md-inline">Lorenzo Taverna</span>
+                            <span class="d-none d-md-inline">@User.Identity.Name</span>
 
                         </a>
                        
@@ -195,7 +213,7 @@
                             <li class="user-header text-bg-primary" style="min-height:100px!important">
                                 <div class="bi bi-person-circle rounded-circle shadow" style="font-size:1.5rem!important"></div>
                                 <p>
-                                   Lorenzo Taverna - Web Developer
+                                   @User.Identity.Name
                                 </p>
                             </li>
                             <!--end::User Image-->
@@ -203,7 +221,7 @@
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="#" class="btn btn-default btn-flat">Profile</a>
-                                <a href="#" class="btn btn-default btn-flat float-end">Sign out</a>
+                                <a href="/Account/Logout" class="btn btn-default btn-flat float-end">Sign out</a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -220,7 +238,7 @@
             <!--begin::Sidebar Brand-->
             <div class="sidebar-brand">
                 <!--begin::Brand Link-->
-                <a href="./index.html" class="brand-link">
+                <a href="/Home" class="brand-link">
                     <!--begin::Brand Image-->
                     <img src="~/assets/img/logo-pride.png"
                          alt="Home di jjodel"
@@ -240,7 +258,7 @@
                         role="menu"
                         data-accordion="false">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="/home" class="nav-link">
                                 <i class="nav-icon bi bi-house-door text-white"></i>
                                 <p>
                                     Home
@@ -249,7 +267,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a   class="nav-link active">
+                            <a class="nav-link active" >
                                 <i class="nav-icon bi bi-person-circle text-white"></i>
                                 <p>
                                     User
@@ -258,23 +276,18 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a asp-controller="account"    class="nav-link active">
+                                    <a asp-controller="account" asp-action="index" class="nav-link">
                                        <i class="nav-icon bi bi-people text-white"></i>
                                         <p>All Users</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="bi bi-person-plus"></i>
+                                    <a asp-controller="account" asp-action="P_Add" class="nav-link">
+                                        <i class="nav-icon bi bi-person-plus text-white"></i>
                                         <p>Add User</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon bi bi-person-lines-fill text-white"></i>
-                                        <p>Edit User</p>
-                                    </a>
-                                </li>
+                                
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -293,17 +306,12 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                    <a asp-controller="Project" asp-action="P_Add" class="nav-link">
                                         <i class="nav-icon bi bi-file-earmark-plus text-white"></i>
                                         <p>Add New Project</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon bi bi-pencil-square text-white"></i>
-                                        <p>Edit Project</p>
-                                    </a>
-                                </li>
+                                
                             </ul>
                         </li>
                        
@@ -404,13 +412,13 @@
                 <div class="container-fluid">
                     <!--begin::Row-->
                     <div class="row">
-                        <div class="col-sm-6"><h3 class="mb-0">Dashboard</h3></div>
-                        <div class="col-sm-6">
+                        <div class="col-sm-6"><h3 class="mb-0">@ViewBag.Title</h3></div>
+                        @* <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-end">
                                 <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                                <li class="breadcrumb-item active" aria-current="page">Dashboard2</li>
                             </ol>
-                        </div>
+                        </div> *@
                     </div>
                     <!--end::Row-->
                 </div>
@@ -425,8 +433,62 @@
                         @RenderBody()
 
                         </main>
-                   
-                    
+
+                    <div class="modal fade" id="SuccessModal" tabindex="-1" aria-labelledby="SuccessModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title" id="SuccessModalLabel">Success</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="SuccessModal-body">
+                                    <p id="SuccessModal-body-p"></p>
+                                </div>
+
+                                <div class="modal-footer" id="SuccessModal-footer">
+                                    <button id="SuccessModal-footer-Proceed" type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="ErrorModal" tabindex="-1" aria-labelledby="ErrorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="ErrorModalLabel">Error</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="ErrorModal-body">
+                                    <p id="ErrorModal-body-p"></p>
+
+                                </div>
+
+                                <div class="modal-footer" id="ErrorModal-footer">
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="ConfirmModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title" id="ConfirmModalLabel">Confirm Operation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="ConfirmModal-body">
+                                    <p id="ConfirmModal-body-p"></p>
+                                </div>
+
+                                <div class="modal-footer" id="ConfirmModal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button id="ConfirmModal-footer-Proceed" type="button" class="btn btn-warning" data-bs-dismiss="modal">Proceed</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!--end::Container-->
             </div>
@@ -441,7 +503,7 @@
             <!--begin::Copyright-->
             <strong>
                 Copyright &copy;
-                <a href="#" class="text-decoration-none">CapoWeb</a>.
+                <a href="#" class="text-decoration-none">Jjodel</a>.
             </strong>
             All rights reserved.
             <!--end::Copyright-->
@@ -523,7 +585,63 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.2/js/buttons.print.min.js"></script>
-    
+    <script>
+        var modal;
+        function CloseModal(){
+            modal.hide();
+        }
+
+        function Go(url){        
+            window.location.href = url;            
+        }
+
+        function OpenModal(id){
+            modal = new bootstrap.Modal(document.getElementById(id));
+            modal.show();
+        }
+        
+        function OpenConfirmModal(id, text, functionCallback){
+
+            let modal = new bootstrap.Modal(document.getElementById("ConfirmModal"));
+            document.getElementById("ConfirmModal-body-p").innerText = text;
+            // set function dynamically
+            document.getElementById("ConfirmModal-footer-Proceed").setAttribute('onclick', functionCallback);
+            modal.show();
+        }
+
+        function OpenErrorModal(text){
+            let modal = new bootstrap.Modal(document.getElementById("ErrorModal"));
+            document.getElementById("ErrorModal-body-p").innerText = text;
+
+            modal.show();
+        }
+
+        function OpenSuccessModal(text, functionCallback){
+            let modal = new bootstrap.Modal(document.getElementById("SuccessModal"));
+            document.getElementById("SuccessModal-body-p").innerText = text;
+            if(functionCallback){
+                document.getElementById("SuccessModal-footer-Proceed").setAttribute('onclick', functionCallback);
+
+            }
+
+            modal.show();
+        }
+
+        function SetFormErrors(errorMessages) {
+            for (var key in errorMessages) {
+                console.log(key)
+                if (errorMessages.hasOwnProperty(key)) {
+                    var errorMessage = errorMessages[key];
+
+                    var errorElement = document.getElementById(key + '-error');
+
+                    if (errorElement) {
+                        errorElement.textContent = errorMessage;
+                    }
+                }
+            }
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

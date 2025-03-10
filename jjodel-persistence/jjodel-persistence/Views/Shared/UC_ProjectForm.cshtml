@@ -1,0 +1,49 @@
+﻿ @model jjodel_persistence.Models.Entity.Project
+
+
+
+<form id="project-form">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(i => i.Id)
+   <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="Name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required />
+                <span asp-validation-for="Name" id="Name-error" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label for="Description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="Description" name="Description" value="@Model.Description" required />
+                <span asp-validation-for="Name" id="Description-error" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-md-6">
+                <label for="Type" class="form-label">Type</label>
+                <input type="text" class="form-control" id="Type" name="Type" value="@Model.Type" required />
+                <span asp-validation-for="Name" id="Type-error" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-md-6">
+                <label for="State" class="form-label">State</label>
+                <input type="text" class="form-control" id="State" name="State" value="@Model.State" required />
+                <span asp-validation-for="Name" id="State-error" class="text-danger"></span>
+
+            </div>
+          
+           
+            <div class="col-12">
+                <button class="btn btn-primary" type="button" onclick="SaveProject()" style="float: right;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+
+
+ 

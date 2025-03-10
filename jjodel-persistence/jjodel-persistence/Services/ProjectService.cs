@@ -58,7 +58,17 @@ namespace jjodel_persistence.Services {
             return await this._applicationDbContext.
                 Projects.
                 Include(p => p.Collaborators).
-                ThenInclude(p=> p.Author).
+                Include(p=> p.Author).
+                AsNoTracking().
+                ToListAsync();
+        }
+
+        public async Task<List<Project>> GetsAsNoTracking() {
+            return await this._applicationDbContext.
+                Projects.
+                Include(p => p.Collaborators).
+                Include(p => p.Author).
+                AsNoTracking().
                 ToListAsync();
         }
 

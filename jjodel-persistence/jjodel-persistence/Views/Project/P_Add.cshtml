@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Add Project";
+}
+
+
+<div class="row" id="add-project-container">
+
+</div>
+
+
+
+ <script>    
+
+        document.addEventListener("DOMContentLoaded", function () {
+            AddProject();
+        });
+
+        function AddProject(){
+            fetch(`/Project/Add`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("add-project-container").innerHTML = data;
+                })
+                .catch(error => OpenErrorModal(error) );
+        }
+
+        function SaveProject() {
+            let form = document.getElementById("project-form");
+            let formData = new FormData(form);
+           
+            fetch("/Project/Save", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {   
+                   OpenSuccessModal(data.message, "Go('/project')");       
+                }               
+                else {
+                    SetFormErrors(data.errors);
+                }
+            })
+            .catch(error => OpenErrorModal(error) );
+        }
+    </script>

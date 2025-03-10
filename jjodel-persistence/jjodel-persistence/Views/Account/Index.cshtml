@@ -1,89 +1,20 @@
-﻿@model List<jjodel_persistence.Models.Entity.ApplicationUser>
-
-
+﻿@{
+    ViewBag.Title = "Users";
+}
 
 <div class="row">
-    <table id="example" class="table table-bordered table-responsive table-hover" style="width:100%">
-        <caption>All Users</caption>
-        <thead>
-            <tr>
-                <th></th>
-                <th>Nickname</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Email</th>
-                <th>Country</th>
-                <th>BirthDate</th>
-                <th>Phone Number</th>
-                <th>Affiliation</th>
-                <th>Created Projects</th>
-                <th>Collaborate to</th>
-                <th>Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model)
-            {
-                <tr>
-                    @{
-                        string color = "red";
-                        if (user.NewsletterEnabled) {
+    <div class=" d-grid gap-2 d-flex justify-content-end">
+        <button class="btn btn-danger deleteUserBtn" onclick="AddUser()" title="Add User">
+            <i class="bi bi-plus"></i>
+        </button>
+    </div>
+    
+</div>
+<div class="row" id="user-container">
 
-                            color = "blue";
-                        }
-                    }
-                    @{
-                        string enableNewsLetter = "newsletter enabled"; 
-                        if(user.NewsletterEnabled != true) {
-                            enableNewsLetter = "newsletter disabled";
-                        }
-                    }
-                    <td title="@enableNewsLetter" style="background-color: @color; width:2px; min-width: 1px!important;"></td>
-                    <td >@user.UserName</td>
-                    <td>@user.Name</td>
-                    <td>@user.Surname</td>
-                    <td>@user.Email</td>
-                    <td>@user.Country</td>
-                    <td>@user.BirthDate.ToShortDateString()</td>
-                    <td>@user.PhoneNumber</td>
-                    <td>@user.Affiliation</td>
-                    <td>@user.Author?.Count</td>
-                    <td>@user.Collaborators?.Count</td>
-
-                    <td>
-                        <div class="d-grid gap-2 d-flex justify-content-center">
-                            <button class="btn btn-primary editUserBtn" onclick="EditUser('@user.Id')">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger deleteUserBtn">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-
-        <tfoot>
-            <tr>
-                <th></th>
-                <th>Nickname</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Email</th>
-                <th>Country</th>
-                <th>BirthDate</th>
-                <th>Phone Number</th>
-                <th>Affiliation</th>
-                <th>Created Projects</th>
-                <th>Collaborate to</th>
-                <th>Options</th>
-            </tr>
-        </tfoot>
-    </table>
 </div>
 
-<!-- Modale per la modifica dell'utente -->
+ 
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -98,9 +29,62 @@
     </div>
 </div>
 
- <script>
+ <script>    
+
         document.addEventListener("DOMContentLoaded", function () {
-        let table = new DataTable("#example", {
+            List();    
+        });
+
+        function AddUser(){
+            fetch(`/Account/Add`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("modal-body").innerHTML = data;
+                    document.getElementById("editUserModalLabel").innerText = "Add User";
+                    OpenModal("editUserModal");
+                })
+                .catch(error => OpenErrorModal(error) );
+        }
+
+        function EditUser(id) {
+            fetch(`/Account/Edit/${id}`)
+                .then(response => response.text()) 
+                .then(data => {
+                    document.getElementById("modal-body").innerHTML = data;
+                    document.getElementById("editUserModalLabel").innerText = "Edit User";
+                    OpenModal("editUserModal");
+                    
+                })
+                .catch(error => OpenErrorModal(error) );
+        }
+
+    function DeleteUser(id){
+         fetch(`/Account/Delete/${id}`)
+                .then(response => response.text())
+                .then(data => {
+                    var jsonData = JSON.parse(data)
+                    if(jsonData.success){
+                        OpenSuccessModal(jsonData.message, null);
+                        List();
+                    }
+                    else{
+                        OpenErrorModal(jsonData.message)
+                    }
+                })
+                .catch(error => OpenErrorModal(error) );
+    }
+
+    function DeleteUserConfirm(id){
+        OpenConfirmModal(id, "Are you sure you want to delete this user? This action cannot be undone.", "DeleteUser('"+id+"')");
+    }
+
+    function List(){
+       
+        fetch('/Account/List')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("user-container").innerHTML = data;
+                    let table = new DataTable("#example", {
 
             layout: {
                 top1Start: {
@@ -134,18 +118,30 @@
                 }
             }
         });
-
-       
-    });
-        function EditUser(id) {
-        fetch(`/Account/Edit/${id}`)
-            .then(response => response.text()) 
-            .then(data => {
-                document.getElementById("modal-body").innerHTML = data;
-                let editModal = new bootstrap.Modal(document.getElementById("editUserModal"));
-                editModal.show();
-            })
-            .catch(error => console.error("Errore nel recupero del contenuto della modale:", error));
+                })
+                .catch(error => OpenErrorModal(error) );
     }
 
-</script>
+        function SaveUser() {
+            let form = document.getElementById("editUserForm");
+            let formData = new FormData(form);
+           
+            fetch("/Account/Save", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {   
+                   CloseModal()
+                   OpenSuccessModal(data.message, null); 
+                   List();
+                }
+               
+                else {
+                    SetFormErrors(data.errors);
+                }
+            })
+            .catch(error => OpenErrorModal(error) );
+        }
+    </script>

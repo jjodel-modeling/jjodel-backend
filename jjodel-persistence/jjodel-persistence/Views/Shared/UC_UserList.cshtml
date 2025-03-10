@@ -1,0 +1,79 @@
+﻿@model List<jjodel_persistence.Models.Entity.ApplicationUser>
+
+
+
+<table id="example" class="table table-bordered table-responsive table-hover" style="width:100%">
+    <caption>All Users</caption>
+    <thead>
+        <tr>
+            <th>Nickname</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Country</th>
+            <th>BirthDate</th>
+            <th>Phone Number</th>
+            <th>Affiliation</th>
+            <th>Created Projects</th>
+            <th>Collaborate to</th>
+            <th>Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model) {
+            <tr>
+                @{
+                    string color = "red";
+                    if (user.NewsletterEnabled){
+
+                        color = "blue";
+                    }
+                }
+                @{
+                    string enableNewsLetter = "newsletter enabled";
+                    if (user.NewsletterEnabled != true)
+                    {
+                        enableNewsLetter = "newsletter disabled";
+                    }
+                }
+                <td title="@enableNewsLetter" style="border-left: solid 3px @color;">@user.UserName</td>
+                <td>@user.Name</td>
+                <td>@user.Surname</td>
+                <td>@user.Email</td>
+                <td>@user.Country</td>
+                <td>@user.BirthDate.ToShortDateString()</td>
+                <td>@user.PhoneNumber</td>
+                <td>@user.Affiliation</td>
+                <td>@user.Author?.Count</td>
+                <td>@user.Collaborators?.Count</td>
+
+                <td>
+                    <div class="d-grid gap-2 d-flex justify-content-center">
+                        <button class="btn btn-primary editUserBtn" onclick="EditUser('@user.Id')" title="Edit User">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-danger deleteUserBtn" onclick="DeleteUserConfirm('@user.Id')" title="Delete User">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th>Nickname</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Country</th>
+            <th>BirthDate</th>
+            <th>Phone Number</th>
+            <th>Affiliation</th>
+            <th>Created Projects</th>
+            <th>Collaborate to</th>
+            <th>Options</th>
+        </tr>
+    </tfoot>
+</table>

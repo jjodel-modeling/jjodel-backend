@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Add User";
+}
+
+
+<div class="row" id="add-user-container">
+
+</div>
+
+
+
+ <script>    
+
+        document.addEventListener("DOMContentLoaded", function () {
+            AddUser();
+        });
+
+        function AddUser(){
+            fetch(`/Account/Add`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("add-user-container").innerHTML = data;
+                })
+                .catch(error => OpenErrorModal(error) );
+        }
+
+    function SaveUser() {
+            let form = document.getElementById("editUserForm");
+            let formData = new FormData(form);
+           
+            fetch("/Account/Save", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {   
+                   OpenSuccessModal(data.message, "Go('/account')");       
+                }               
+                else {
+                    SetFormErrors(data.errors);
+                }
+            })
+            .catch(error => OpenErrorModal(error) );
+        }
+    </script>
