@@ -47,7 +47,7 @@ namespace jjodel_persistence.Services {
 
                 factory.UsingTemplateFromFile(
                     Directory.GetCurrentDirectory() + 
-                    "\\Templates\\" + 
+                    "/Templates/" + 
                     templateName + 
                     "_" + 
                     language + 

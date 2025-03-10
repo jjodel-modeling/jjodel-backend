@@ -361,14 +361,14 @@ namespace jjodel_persistence.Controllers.Web {
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpGet]
         [Route("ResetPassword")]
         public async Task<ActionResult> ResetPassword() {
             return View();
         }
 
         [AllowAnonymous]
-        [HttpGet]
+        [HttpPost]
         [Route("ResetPassword")]
         public async Task<ActionResult> ResetPassword(ResetPasswordRequest resetPasswordRequest) {
             try {

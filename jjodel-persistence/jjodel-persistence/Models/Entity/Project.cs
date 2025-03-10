@@ -17,7 +17,7 @@ namespace jjodel_persistence.Models.Entity {
         public string Type { get; set; }
 
         [Required]
-        public string State { get; set; }
+        public string State { get; set; } // project content
 
         [Required]
         public double ViewpointsNumber { get; set; } // relationship?
