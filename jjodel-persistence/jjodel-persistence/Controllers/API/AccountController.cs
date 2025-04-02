@@ -16,7 +16,6 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace jjodel_persistence.Controllers.API {
     [Route("api/[controller]")]
-    [Route("api")]
     [ApiController]
     public class AccountController : ControllerBase {
 
@@ -383,9 +382,6 @@ namespace jjodel_persistence.Controllers.API {
             }
         }
 
-
-
-
         [AllowAnonymous]
         [HttpPost("[action]")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest) {
@@ -411,6 +407,41 @@ namespace jjodel_persistence.Controllers.API {
                         this._logger.LogInformation("The password has been reset");
                         return Ok(); 
                     
+                }
+
+                return BadRequest();
+            }
+            catch (Exception ex) {
+                this._logger.LogError("Reset error: " + ex.Message);
+                return BadRequest();
+            }
+        } 
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ResetPasswordWithEmail([FromBody] ResetPasswordRequestWithEmail retrivePasswordRequest) {
+            try {
+                this._logger.LogInformation("Richiesto reset password");
+                if (ModelState.IsValid) {
+                    var user = await _userManager.FindByEmailAsync(retrivePasswordRequest.Email);
+                    
+                    if (user == null) {
+                        _logger.LogInformation("User " + retrivePasswordRequest.Email + " not found");
+                        return BadRequest();
+                    }
+                    // generate password.
+                    string password = _authService.GenerateRandomPassword();
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await _userManager.ResetPasswordAsync(user, token, password);
+
+                    if (!result.Succeeded) {
+
+                        this._logger.LogWarning("Password reset failed for user " + user.UserName);
+                        return BadRequest();
+                    }
+                    await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = user.UserName });
+                    this._logger.LogInformation("The password has been reset");
+                    return Ok();
+
                 }
 
                 return BadRequest();

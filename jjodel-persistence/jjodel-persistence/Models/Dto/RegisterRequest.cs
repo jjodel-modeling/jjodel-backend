@@ -29,7 +29,7 @@ namespace jjodel_persistence.Models.Dto {
         public string Password { get; set; }
 
         [Phone]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         public DateTime BirthDate { get; set; }
     }

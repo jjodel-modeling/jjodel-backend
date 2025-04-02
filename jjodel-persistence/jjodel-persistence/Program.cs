@@ -139,18 +139,18 @@ app.UseStaticFiles();
 // must be before use auth.
 app.UseRouting();
 
+// global cors policy
+app.UseCors(x => x
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 
-
-// global cors policy
-app.UseCors(x => x
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
 
 app.UseSerilogRequestLogging();
 

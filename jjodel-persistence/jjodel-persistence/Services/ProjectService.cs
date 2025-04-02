@@ -34,8 +34,8 @@ namespace jjodel_persistence.Services {
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
                 Where(m => 
-                    m.Author.UserName.Equals(AuthorName, StringComparison.OrdinalIgnoreCase) || 
-                    m.Collaborators.Any(c => c.UserName.Equals(AuthorName, StringComparison.OrdinalIgnoreCase))
+                    m.Author.UserName.Equals(AuthorName) || 
+                    m.Collaborators.Any(c => c.UserName.Equals(AuthorName))
                     ).ToListAsync();
         }
 
