@@ -103,6 +103,7 @@ namespace jjodel_persistence.Controllers.API {
 
                     ApplicationUser user = await _userManager.FindByIdAsync(confirmAccountRequest.UserId);
                     if(user != null) {
+                        confirmAccountRequest.Token = confirmAccountRequest.Token.Replace('§', '/');
                         IdentityResult result = await _userManager.ConfirmEmailAsync(user, confirmAccountRequest.Token);
                         if(result.Succeeded) {
                             this._logger.LogInformation("Confirmed Account:" + confirmAccountRequest.UserId);
@@ -284,8 +285,8 @@ namespace jjodel_persistence.Controllers.API {
 
                     ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
 
-                    if(user == null || user.IsDeleted) {
-                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists or is deleted.");
+                    if(user == null || user.IsDeleted || !user.EmailConfirmed) {
+                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists, is deleted or is not confirmed.");
                         return BadRequest();
                     }
 
@@ -359,8 +360,8 @@ namespace jjodel_persistence.Controllers.API {
                     await _userManager.AddToRolesAsync(user, new List<string> { "User" });
 
                     // generate confirm token.
-                    string confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
+                    string confirmTokenWithSlashes = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    string confirmToken = confirmTokenWithSlashes.Replace('/', '§');
                     // send mail.
                     await _mailService.SendEmail(
                         new List<string> { request.Email },
@@ -368,7 +369,9 @@ namespace jjodel_persistence.Controllers.API {
                         new ConfirmAccount() {
                             Name = request.Name,
                             Surname = request.Surname,
-                            Token = confirmToken
+                            Token = confirmToken,
+                            Id = user.Id
+
                         });
                     return Ok(result);
                 }

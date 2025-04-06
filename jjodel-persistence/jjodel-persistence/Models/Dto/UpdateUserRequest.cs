@@ -25,7 +25,7 @@ namespace jjodel_persistence.Models.Dto {
         public bool Newsletter { get; set; } // map to newsletter enabled     
 
         [Phone]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [EmailAddress]
         public string Email { get; set; }
