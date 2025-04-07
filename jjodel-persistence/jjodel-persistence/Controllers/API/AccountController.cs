@@ -302,6 +302,8 @@ namespace jjodel_persistence.Controllers.API {
 
                     List<Claim> claims = new List<Claim>();
                     claims.Add(new Claim(ClaimTypes.Name, user.UserName));
+                    claims.Add(new Claim(ClaimTypes.Email, user.Email));
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
                     foreach(var role in roles) {
                         claims.Add(new Claim(ClaimTypes.Role, role));
                     }
@@ -491,7 +493,7 @@ namespace jjodel_persistence.Controllers.API {
                     if(user.NewsletterEnabled != updateUserRequest.Newsletter ) {
                         user.NewsletterEnabled = updateUserRequest.Newsletter;
                         if(updateUserRequest.Newsletter) {
-                            user.NewsletterEnableDate = DateTime.Now;
+                            user.NewsletterEnableDate = DateTime.UtcNow;
                         }
                     }
 
