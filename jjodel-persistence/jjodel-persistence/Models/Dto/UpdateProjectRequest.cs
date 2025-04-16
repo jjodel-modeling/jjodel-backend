@@ -16,7 +16,7 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public string Type { get; set; }
 
-        [Required]
+        //[Required]
         public string State { get; set; }
 
         [Required]
