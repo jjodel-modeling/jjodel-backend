@@ -23,6 +23,9 @@ jobs:
         with:
           dotnet-version: '9.x'
 
+      - name: Elenca file nella directory
+        run: ls -la
+
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
