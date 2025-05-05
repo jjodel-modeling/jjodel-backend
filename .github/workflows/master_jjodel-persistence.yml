@@ -28,9 +28,12 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Release
+      
+      - name: Elenca file nella directory
+        run: cd jjodel-persistence && ls -la
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish jjodel-persistence/jjodel-persistence.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
