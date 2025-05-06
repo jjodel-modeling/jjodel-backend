@@ -29,15 +29,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
 
-Console.WriteLine("***************: ", builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
-Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
-Console.WriteLine("*************** environment: ", builder.Environment.EnvironmentName);
+Console.WriteLine("***************: ");
+Console.WriteLine(builder.Configuration.ToString());
+Console.WriteLine(builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
+
+Console.WriteLine("***************: ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
         builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount");
     options.Password.RequiredLength =
-        builder.Configuration.GetValue<int>("Identity:RequiredLength");
+        builder.Configuration.GetValue<int>("Identity:RequireLength");
     options.Password.RequireDigit =
         builder.Configuration.GetValue<bool>("Identity:RequireDigit");
     options.Password.RequireLowercase =
