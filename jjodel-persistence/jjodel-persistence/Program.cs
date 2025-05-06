@@ -12,10 +12,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#if !DEBUG
+
 
 builder.Configuration.AddEnvironmentVariables();
-#endif
+
 
 // Add services to the container (DI).
 
