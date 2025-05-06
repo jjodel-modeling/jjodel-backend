@@ -13,7 +13,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
 // Add services to the container (DI).
 
 // configuration.
@@ -25,6 +24,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                // use postgre
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
+
+foreach(var c in builder.Configuration.AsEnumerable()) {
+    Console.WriteLine(c.Key, c.Value);
+}   
 
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
