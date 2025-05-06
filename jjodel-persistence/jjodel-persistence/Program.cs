@@ -24,6 +24,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
 
+Console.WriteLine("***************: ", builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
+Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
+Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
+
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
         builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount");
@@ -40,6 +44,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 })
    .AddEntityFrameworkStores<ApplicationDbContext>()
    .AddDefaultTokenProviders();
+
+
 
 builder.Services.AddAuthentication(
     options => {
