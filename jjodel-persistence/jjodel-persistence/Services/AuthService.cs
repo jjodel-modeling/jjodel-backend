@@ -64,7 +64,7 @@ namespace jjodel_persistence.Services {
 
         public string GenerateRandomPassword() {
             PasswordOptions opts = new PasswordOptions() {
-                RequiredLength = _identitySettings.RequiredLength,
+                RequiredLength = _identitySettings.RequireLength,
                 RequireDigit = _identitySettings.RequireDigit,
                 RequireLowercase = _identitySettings.RequireLowercase,
                 RequireNonAlphanumeric = _identitySettings.RequireNonAlphanumeric,
