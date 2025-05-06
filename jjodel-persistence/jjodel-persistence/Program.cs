@@ -30,7 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 Console.WriteLine("*************** ");
 foreach(var c in builder.Configuration.AsEnumerable()) {
-    Console.WriteLine(c.Key + " = " + c.Value);
+    Console.WriteLine(c.Key + " = " + c.Value + "-" + builder.Configuration[c.Key]);
 }
 Console.WriteLine("*************** ");
 
