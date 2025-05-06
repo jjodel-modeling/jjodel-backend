@@ -13,8 +13,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Configuration.AddEnvironmentVariables();
-
 
 // Add services to the container (DI).
 
@@ -28,14 +26,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
 
-Console.WriteLine("*************** ");
-foreach(var c in builder.Configuration.AsEnumerable()) {
-    Console.WriteLine(c.Key + " = " + c.Value + "-" + builder.Configuration[c.Key]);
-}
-Console.WriteLine(builder.Configuration["Jwt_Issuer"]);
-Console.WriteLine(builder.Configuration["Jwt:Issuer"]);
-Console.WriteLine(builder.Configuration["Jwt__Issuer"]);
-Console.WriteLine("*************** ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
