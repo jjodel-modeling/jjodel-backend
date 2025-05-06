@@ -28,12 +28,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
 
-Console.WriteLine("***************: ");
-Console.WriteLine("jwt ", builder.Configuration.GetSection("Jwt").Get<Jwt>());
-
-
-Console.WriteLine("jwt", builder.Configuration.GetSection(nameof(Jwt)).Value);
-Console.WriteLine("***************: ");
+Console.WriteLine("*************** ");
+Console.WriteLine("db ", builder.Configuration.GetConnectionString("Default"));
+Console.WriteLine("db2", builder.Configuration.GetValue<string>("ConnectionStrings:Default"));
+Console.WriteLine("db3", builder.Configuration.GetValue<string>("ConnectionStrings_Default"));
+Console.WriteLine("db4", builder.Configuration.GetValue<string>("ConnectionStrings__Default"));
+Console.WriteLine("*************** ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
