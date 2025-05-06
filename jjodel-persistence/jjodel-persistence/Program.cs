@@ -13,7 +13,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
 builder.Configuration.AddEnvironmentVariables();
 
 
@@ -32,6 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 Console.WriteLine("***************: ");
 Console.WriteLine(builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
 Console.WriteLine(builder.Configuration["Jwt:SecurityKey"]);
+Console.WriteLine(builder.Configuration["Jwt_SecurityKey"]);
 Console.WriteLine("***************: ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
