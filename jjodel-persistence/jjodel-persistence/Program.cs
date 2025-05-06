@@ -29,9 +29,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                );
 
 Console.WriteLine("***************: ");
-Console.WriteLine(builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
-Console.WriteLine(builder.Configuration["Jwt:SecurityKey"]);
-Console.WriteLine(builder.Configuration["Jwt_SecurityKey"]);
+Console.WriteLine(builder.Configuration.GetValue<bool>("Identity_RequireConfirmedAccount"));
+Console.WriteLine("Jwt:SecurityKey",builder.Configuration["Jwt:SecurityKey"]);
+Console.WriteLine("Jwt_SecurityKey", builder.Configuration["Jwt_SecurityKey"]);
+Console.WriteLine("db",builder.Configuration.GetConnectionString("Default"));
+Console.WriteLine("jwt", builder.Configuration.GetSection(nameof(Jwt)));
 Console.WriteLine("***************: ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
