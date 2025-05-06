@@ -51,14 +51,6 @@ jobs:
         with:
           name: .net-app
 
-      - name: App Settings Variable Substitution
-        uses: microsoft/variable-substitution@v1
-        with:
-            files: '${{env.DOTNET_ROOT}}/myapp/appsettings.json'
-        env:
-          ConnectionStrings.Default: ${{ secrets.SOME_CONNECTION_STRING }}
-          App.ServerRootAddress: ${{ env.SERVER_ROOT_ADDRESS }}
-
       - name: Login to Azure
         uses: azure/login@v2
         with:

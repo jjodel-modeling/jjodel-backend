@@ -181,9 +181,3 @@ using(var scope = app.Services.CreateScope()) {
 #endif
 
 app.Run();
-
-
-
-/*
- *  1) User postgres; Password=postgres; Port=5432; Database=jjodel;
- */
