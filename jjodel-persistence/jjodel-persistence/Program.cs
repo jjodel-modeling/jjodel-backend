@@ -30,9 +30,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                );
 
 Console.WriteLine("***************: ");
-Console.WriteLine(builder.Configuration.ToString());
 Console.WriteLine(builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
-
+Console.WriteLine(builder.Configuration["Jwt:SecurityKey"]);
 Console.WriteLine("***************: ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
