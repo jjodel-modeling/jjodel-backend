@@ -33,6 +33,10 @@ Console.WriteLine("db ", builder.Configuration.GetConnectionString("Default"));
 Console.WriteLine("db2", builder.Configuration.GetValue<string>("ConnectionStrings:Default"));
 Console.WriteLine("db3", builder.Configuration.GetValue<string>("ConnectionStrings_Default"));
 Console.WriteLine("db4", builder.Configuration.GetValue<string>("ConnectionStrings__Default"));
+Console.WriteLine("db5", builder.Configuration["ConnectionStrings_Default"]);
+Console.WriteLine("db6", builder.Configuration["ConnectionStrings__Default"]);
+Console.WriteLine("db7", builder.Configuration["ConnectionStrings:Default"]);
+Console.WriteLine("host", builder.Configuration["AllowedHosts"]);
 Console.WriteLine("*************** ");
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
