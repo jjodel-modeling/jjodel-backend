@@ -12,6 +12,11 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if !DEBUG
+
+builder.Configuration.AddEnvironmentVariables();
+#endif
+
 // Add services to the container (DI).
 
 // configuration.
@@ -26,8 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 Console.WriteLine("***************: ", builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
 Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
-Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
-Console.WriteLine("*************** security key: ", builder.Environment.EnvironmentName);
+Console.WriteLine("*************** environment: ", builder.Environment.EnvironmentName);
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
