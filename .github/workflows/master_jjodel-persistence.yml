@@ -23,14 +23,8 @@ jobs:
         with:
           dotnet-version: '9.x'
 
-      - name: Elenca file nella directory
-        run: ls -la
-
       - name: Build with dotnet
-        run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Release
-      
-      - name: Elenca file nella directory
-        run: cd jjodel-persistence && ls -la
+        run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Releasecac     
 
       - name: dotnet publish
         run: dotnet publish jjodel-persistence/jjodel-persistence.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
@@ -56,7 +50,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
+      - name: App Settings Variable Substitution
+        uses: microsoft/variable-substitution@v1
+        with:
+            files: '${{env.DOTNET_ROOT}}/myapp/appsettings.json'
+        env:
+          ConnectionStrings.Default: ${{ secrets.SOME_CONNECTION_STRING }}
+          App.ServerRootAddress: ${{ env.SERVER_ROOT_ADDRESS }}
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
