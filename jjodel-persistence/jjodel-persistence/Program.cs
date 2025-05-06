@@ -27,6 +27,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 Console.WriteLine("***************: ", builder.Configuration.GetValue<bool>("Identity:RequireConfirmedAccount"));
 Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
 Console.WriteLine("*************** security key: ", builder.Configuration["Jwt:SecurityKey"]);
+Console.WriteLine("*************** security key: ", builder.Environment.EnvironmentName);
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
