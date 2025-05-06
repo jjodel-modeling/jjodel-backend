@@ -24,7 +24,7 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Build with dotnet
-        run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Releasecac     
+        run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Release  
 
       - name: dotnet publish
         run: dotnet publish jjodel-persistence/jjodel-persistence.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
