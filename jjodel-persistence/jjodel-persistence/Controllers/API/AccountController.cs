@@ -384,6 +384,7 @@ namespace jjodel_persistence.Controllers.API {
                     return Ok(result);
                 }
                 else {
+                    
                     return BadRequest();
                 }
             }
