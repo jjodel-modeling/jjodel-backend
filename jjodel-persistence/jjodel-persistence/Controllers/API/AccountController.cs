@@ -338,6 +338,8 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             try {
+                this._logger.LogError(ModelState.ErrorCount.ToString());
+                this._logger.LogError(ModelState.IsValid.ToString());
                 if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
