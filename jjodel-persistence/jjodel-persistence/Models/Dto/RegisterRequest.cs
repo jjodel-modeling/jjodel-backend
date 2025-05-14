@@ -31,6 +31,6 @@ namespace jjodel_persistence.Models.Dto {
         [Phone]
         public string? PhoneNumber { get; set; }
 
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
 }

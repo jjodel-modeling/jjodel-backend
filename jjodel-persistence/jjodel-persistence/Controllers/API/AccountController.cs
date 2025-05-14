@@ -350,7 +350,7 @@ namespace jjodel_persistence.Controllers.API {
                         NewsletterEnabled = request.NewsletterEnabled,
                         NewsletterEnableDate = request.NewsletterEnabled ? DateTime.UtcNow : DateTime.MinValue,
                         Country = request.Country,
-                        BirthDate = request.BirthDate,
+                        BirthDate = request.BirthDate.HasValue ? request.BirthDate.Value : DateTime.MinValue,
                         Affiliation = request.Affiliation,
                         PhoneNumber = request.PhoneNumber
                     };
