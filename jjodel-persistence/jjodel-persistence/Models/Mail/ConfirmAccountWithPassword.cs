@@ -21,5 +21,8 @@ namespace jjodel_persistence.Models.Mail {
 
         [Required]
         public string Id { get; set; }
+
+        [Required]
+        public string Url { get; set; }
     }
 }

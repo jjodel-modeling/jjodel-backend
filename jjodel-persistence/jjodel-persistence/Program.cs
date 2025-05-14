@@ -25,10 +25,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
 
-foreach(var c in builder.Configuration.AsEnumerable()) {
-    Console.WriteLine(c.Key, c.Value);
-}   
-
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =

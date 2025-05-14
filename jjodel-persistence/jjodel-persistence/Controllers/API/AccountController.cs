@@ -26,6 +26,7 @@ namespace jjodel_persistence.Controllers.API {
         private readonly MailService _mailService;
         private readonly AuthService _authService;
         private readonly Jwt _jwtSettings;
+        private readonly IConfiguration _configuration;
 
 
         public AccountController(
@@ -35,7 +36,9 @@ namespace jjodel_persistence.Controllers.API {
             ILogger<AccountController> logger,
             MailService mailService,
             AuthService authService,
-            IOptions<Jwt> jwtSettings
+            IOptions<Jwt> jwtSettings,
+            IConfiguration configuration
+
             ) {
 
             this._userManager = userManager;
@@ -45,6 +48,7 @@ namespace jjodel_persistence.Controllers.API {
             this._logger = logger;
             this._authService = authService;
             this._jwtSettings = jwtSettings.Value;
+            this._configuration = configuration;
 
         }
 
@@ -372,7 +376,9 @@ namespace jjodel_persistence.Controllers.API {
                             Name = request.Name,
                             Surname = request.Surname,
                             Token = confirmToken,
-                            Id = user.Id
+                            Id = user.Id,
+                            Url = this._configuration["FrontendEndpoint"]
+
 
                         });
                     return Ok(result);

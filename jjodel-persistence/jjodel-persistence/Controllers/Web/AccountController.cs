@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using jjodel_persistence.Models.Mail;
 using System.Linq;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.Extensions.Configuration;
 
 namespace jjodel_persistence.Controllers.Web {
 
@@ -31,6 +32,7 @@ namespace jjodel_persistence.Controllers.Web {
         private readonly MailService _mailService;
         private readonly AuthService _authService;
         private readonly Jwt _jwtSettings;
+        private readonly IConfiguration _configuration;
 
         public AccountController(
             UserManager<ApplicationUser> userManager, 
@@ -39,7 +41,9 @@ namespace jjodel_persistence.Controllers.Web {
             ILogger<AccountController> logger,
             MailService mailService, 
             AuthService authService, 
-            IOptions<Jwt> jwtSettings
+            IOptions<Jwt> jwtSettings,
+            IConfiguration configuration
+
             ) {
 
             this._userManager = userManager;
@@ -49,6 +53,7 @@ namespace jjodel_persistence.Controllers.Web {
             this._mailService = mailService;
             this._authService = authService;
             this._jwtSettings = jwtSettings.Value;
+            this._configuration = configuration;
         }
 
         [HttpGet]
@@ -280,8 +285,9 @@ namespace jjodel_persistence.Controllers.Web {
                             Name = user.Name,
                             Surname = user.Surname,
                             Token = confirmToken,
-                            Password = randomPassword
-                        });
+                            Password = randomPassword,
+                            Url = this._configuration["FrontendEndpoint"]
+                    });
                     return Json(new { success = true, message ="Operation completed successfully." });
 
                 }
