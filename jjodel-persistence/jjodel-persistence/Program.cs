@@ -159,7 +159,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-//#if DEBUG
+#if DEBUG
 
 // scope needed to initialize db at app startup.
 using(var scope = app.Services.CreateScope()) {
@@ -169,12 +169,12 @@ using(var scope = app.Services.CreateScope()) {
 
     applicationDbContext.Database.Migrate();
     // come se fosse DI.
-    ////DbInitializer db = new DbInitializer(
-    ////    applicationDbContext,
-    ////    services.GetService<UserManager<ApplicationUser>>(),
-    ////    services.GetService<RoleManager<ApplicationRole>>());
-    ////db.Initialize();
+    DbInitializer db = new DbInitializer(
+        applicationDbContext,
+        services.GetService<UserManager<ApplicationUser>>(),
+        services.GetService<RoleManager<ApplicationRole>>());
+    db.Initialize();
 }
-//#endif
+#endif
 
 app.Run();
