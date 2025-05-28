@@ -343,6 +343,7 @@ namespace jjodel_persistence.Controllers.API {
                 if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
+                        _Id = request._Id,
                         UserName = request.Nickname,
                         Surname = request.Surname,
                         Name = request.Name,
@@ -490,6 +491,7 @@ namespace jjodel_persistence.Controllers.API {
                     }
 
                     // update fields.
+                    user._Id = updateUserRequest._Id;
                     user.Surname = updateUserRequest.Surname;
                     user.Name = updateUserRequest.Name;
                     user.UserName = updateUserRequest.Nickname;
@@ -526,6 +528,7 @@ namespace jjodel_persistence.Controllers.API {
         private static UserResponse Convert(ApplicationUser user) {
             UserResponse u = new UserResponse() {
                 Id = user.Id,
+                _Id = user._Id,
                 Email = user.Email,
                 Name = user.Surname,
                 Surname = user.Surname,

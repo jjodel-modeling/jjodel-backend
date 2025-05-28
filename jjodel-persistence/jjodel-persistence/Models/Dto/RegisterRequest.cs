@@ -3,6 +3,8 @@
 namespace jjodel_persistence.Models.Dto {
     public class RegisterRequest {
 
+        public string? _Id { get; set; }
+
         [Required]
         public string Name { get; set; }
 

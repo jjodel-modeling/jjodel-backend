@@ -10,6 +10,8 @@ namespace jjodel_persistence.Models.Entity {
 
     public class ApplicationUser : IdentityUser {
 
+        public string? _Id { get; set; }
+
         [Required]
         public string Surname { get; set; }
 
