@@ -25,7 +25,8 @@
                 <td>@project.Description</td>
                 <td>@project.Type</td>
                 @if(!string.IsNullOrEmpty(project.State)) {
-                    <td> project.State}
+                    <td> 
+                        @project.State.Substring(0, 10)
 
                     </td>
                 }
