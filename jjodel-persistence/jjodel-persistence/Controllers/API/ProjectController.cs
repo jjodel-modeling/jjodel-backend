@@ -37,7 +37,7 @@ namespace jjodel_persistence.Controllers.API {
                 if(ModelState.IsValid) {
                     Project project = new Project() {
                         Id = Guid.NewGuid(),
-                        _Id = createProjectRequest._Id,
+                        _Id = createProjectRequest._Id != null ? createProjectRequest._Id : "",
                         Name = createProjectRequest.Name,
                         Description = createProjectRequest.Description,
                         Type = createProjectRequest.Type,
