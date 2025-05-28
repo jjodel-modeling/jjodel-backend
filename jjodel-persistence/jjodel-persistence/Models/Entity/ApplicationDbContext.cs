@@ -11,6 +11,7 @@ namespace jjodel_persistence.Models.Entity {
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<ApplicationRole> ApplicationRoles { get; set; }
         public DbSet<Project> Projects { get; set; }
+        public DbSet<ClientLog> ClientLogs { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
 

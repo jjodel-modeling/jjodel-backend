@@ -1,0 +1,67 @@
+﻿@model List<jjodel_persistence.Models.Entity.ClientLog>
+<table id="errorsTable" class="table table-bordered table-responsive table-hover" style="width:100%">
+    <caption>All Dev Errors</caption>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Version</th>
+            <th>State</th>
+            <th>When</th>
+            <th>Message</th>
+            <th>StackTrace</th>
+            <th>Component Stack</th>
+            <th>User</th>
+            <th>Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var error in Model)
+        {
+            <tr>
+                <td>@error.Title</td>
+                <td>@error.Version</td>
+                <td>@error.DState</td>
+                <td>@error.Creation.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@error.Message</td>
+                <td>
+                    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#stacktrace-@error.Id">
+                        Show
+                    </button>
+                    <div id="stacktrace-@error.Id" class="collapse">
+                        <pre style="white-space: pre-wrap;">@error.StackTrace</pre>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#compostack-@error.Id">
+                        Show
+                    </button>
+                    <div id="compostack-@error.Id" class="collapse">
+                        <pre style="white-space: pre-wrap;">@error.CompoStack</pre>
+                    </div>
+                </td>
+                <td>@error.User?.UserName</td>
+                <td>
+                    <div class="d-grid gap-2 d-flex justify-content-center">
+                       
+                        <button class="btn btn-danger btn-sm" onclick="DeleteError('@error.Id')" title="Delete Error">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Title</th>
+            <th>Version</th>
+            <th>State</th>
+            <th>When</th>
+            <th>Message</th>
+            <th>StackTrace</th>
+            <th>Component Stack</th>
+            <th>User</th>
+            <th>Options</th>
+        </tr>
+    </tfoot>
+</table>

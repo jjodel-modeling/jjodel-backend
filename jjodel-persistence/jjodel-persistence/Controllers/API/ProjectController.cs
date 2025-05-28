@@ -37,11 +37,10 @@ namespace jjodel_persistence.Controllers.API {
                 if(ModelState.IsValid) {
                     Project project = new Project() {
                         Id = Guid.NewGuid(),
+                        _Id = createProjectRequest._Id,
                         Name = createProjectRequest.Name,
                         Description = createProjectRequest.Description,
                         Type = createProjectRequest.Type,
-                        //Creation = DateTime.Now,
-                        //LastModified = DateTime.Now,
                         Creation = DateTime.UtcNow,
                         LastModified = DateTime.UtcNow,
                         State = "",
@@ -56,12 +55,12 @@ namespace jjodel_persistence.Controllers.API {
                         return Ok(Convert(project));
                     }
                 }
-                return BadRequest();
             }
             catch(Exception ex) {
                 _logger.LogError(ex.Message);
-                return BadRequest();
             }
+            return BadRequest();
+
         }
 
         [Authorize(Roles = "User")]
@@ -78,14 +77,12 @@ namespace jjodel_persistence.Controllers.API {
                     return Ok();
                 }
                 
-
-                return BadRequest();
-
             }
             catch(Exception ex) {
                 this._logger.LogError("Delete project error: " + ex.Message);
-                return BadRequest();
             }
+            return BadRequest();
+
         }
 
         [Authorize(Roles = "User")]
@@ -153,7 +150,7 @@ namespace jjodel_persistence.Controllers.API {
 
                     Project projectToUpdate = await this._projectService.GetById(updateProjectRequest.Id);
                     if(projectToUpdate != null) {
-
+                        projectToUpdate._Id = updateProjectRequest._Id;
                         projectToUpdate.Name = updateProjectRequest.Name;
                         projectToUpdate.Description = updateProjectRequest.Description;
                         projectToUpdate.State = updateProjectRequest.State;
@@ -173,12 +170,12 @@ namespace jjodel_persistence.Controllers.API {
                         }
                     }
                 }                
-                return BadRequest();
             }
             catch(Exception ex) {
                 this._logger.LogError("Edit project error: " + ex.Message);
-                return BadRequest();
             }
+            return BadRequest();
+
         }
 
         #region Convert
@@ -186,6 +183,7 @@ namespace jjodel_persistence.Controllers.API {
         public static ProjectResponse Convert(Project p) {
             ProjectResponse response = new ProjectResponse() {
                 Id = p.Id,
+                _Id = p._Id,
                 Name = p.Name,
                 Description = p.Description,
                 Type = p.Type,
@@ -198,7 +196,6 @@ namespace jjodel_persistence.Controllers.API {
                 IsFavorite = p.IsFavorite,
                 Author = (p.Author != null) ? p.Author.UserName : "",
                 Collaborators = (p.Collaborators != null) ? p.Collaborators.Select(c=> c.UserName).ToList() : new List<string?>(),
-
 
             };
             return response;

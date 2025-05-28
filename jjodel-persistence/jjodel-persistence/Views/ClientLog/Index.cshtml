@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "Client Logs";
+}
+
+
+<div class="row mb-3">
+    <div class="col-auto">
+        <button class="btn btn-outline-danger" onclick="List('Error')">Errors</button>
+        <button class="btn btn-outline-warning" onclick="List('Warning')">Warnings</button>
+        <button class="btn btn-outline-primary" onclick="List('Information')">Informations</button>
+        <button class="btn btn-outline-secondary" onclick="List('All')">All</button>
+
+    </div>
+</div>
+
+<div class="row" id="devError-container">
+</div>
+
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        List("Error");
+    });
+    
+
+    function List(type){
+
+       fetch(`/client-log/List/${type}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("devError-container").innerHTML = data;
+                    let table = new DataTable("#errorsTable", {
+
+            layout: {
+                top1Start: {
+                    buttons: [
+                        {
+                            extend: "copy",
+                            text: '<i class="bi bi-clipboard"></i> Copy',
+                            className: "btn btn-secondary"
+                        },
+                        {
+                            extend: "csv",
+                            text: '<i class="bi bi-file-earmark-spreadsheet"></i> CSV',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "excel",
+                            text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                            className: "btn btn-success"
+                        },
+                        {
+                            extend: "pdf",
+                            text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                            className: "btn btn-danger"
+                        },
+                        {
+                            extend: "print",
+                            text: '<i class="bi bi-printer"></i> Print',
+                            className: "btn btn-primary"
+                        }
+                    ]
+
+                }
+            }
+        });
+       
+                })
+                .catch(error => OpenErrorModal(error) );
+    }
+
+    
+</script>

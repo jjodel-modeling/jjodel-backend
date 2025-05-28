@@ -76,6 +76,7 @@ builder.Services.AddScoped<RoleManager<ApplicationRole>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<ClientLogService>();
 
 builder.Services.AddControllersWithViews(); // add api and MVC
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -158,7 +159,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-#if DEBUG
+//#if DEBUG
 
 // scope needed to initialize db at app startup.
 using(var scope = app.Services.CreateScope()) {
@@ -168,12 +169,12 @@ using(var scope = app.Services.CreateScope()) {
 
     applicationDbContext.Database.Migrate();
     // come se fosse DI.
-    DbInitializer db = new DbInitializer(
-        applicationDbContext,
-        services.GetService<UserManager<ApplicationUser>>(),
-        services.GetService<RoleManager<ApplicationRole>>());
-    db.Initialize();
+    ////DbInitializer db = new DbInitializer(
+    ////    applicationDbContext,
+    ////    services.GetService<UserManager<ApplicationUser>>(),
+    ////    services.GetService<RoleManager<ApplicationRole>>());
+    ////db.Initialize();
 }
-#endif
+//#endif
 
 app.Run();

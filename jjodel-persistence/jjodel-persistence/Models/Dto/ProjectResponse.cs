@@ -6,6 +6,8 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public Guid Id { get; set; }
 
+        public string _Id { get; set; }
+
         [Required]
         public string Name { get; set; }
 

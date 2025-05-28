@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using jjodel_persistence.Models.Entity;
@@ -11,9 +12,11 @@ using jjodel_persistence.Models.Entity;
 namespace jjodel_persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520161844_added_client_logs")]
+    partial class added_client_logs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,9 +279,6 @@ namespace jjodel_persistence.Migrations
                     b.Property<string>("ContextJson")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Creation")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("DState")
                         .HasColumnType("text");
 
@@ -303,6 +303,9 @@ namespace jjodel_persistence.Migrations
 
                     b.Property<string>("Version")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("When")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -354,10 +357,6 @@ namespace jjodel_persistence.Migrations
 
                     b.Property<double>("ViewpointsNumber")
                         .HasColumnType("double precision");
-
-                    b.Property<string>("_Id")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
