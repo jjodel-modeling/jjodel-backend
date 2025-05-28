@@ -150,7 +150,7 @@ namespace jjodel_persistence.Controllers.API {
 
                     Project projectToUpdate = await this._projectService.GetById(updateProjectRequest.Id);
                     if(projectToUpdate != null) {
-                        projectToUpdate._Id = updateProjectRequest._Id;
+                        projectToUpdate._Id = updateProjectRequest._Id != null ? updateProjectRequest._Id : "";
                         projectToUpdate.Name = updateProjectRequest.Name;
                         projectToUpdate.Description = updateProjectRequest.Description;
                         projectToUpdate.State = updateProjectRequest.State;

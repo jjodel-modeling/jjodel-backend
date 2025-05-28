@@ -24,7 +24,14 @@
                 <td>@project.Name</td>
                 <td>@project.Description</td>
                 <td>@project.Type</td>
-                <td>@project.State</td>
+                @if(!string.IsNullOrEmpty(project.State)) {
+                    <td> project.State}
+
+                    </td>
+                }
+                else{
+                    <td>-</td>
+                }
                 <td>@project.Creation</td>
                 <td>@project.LastModified</td>
                 <td>@project.Author.UserName</td>
