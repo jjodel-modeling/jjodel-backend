@@ -160,7 +160,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-#if DEBUG
+//#if DEBUG
 
 // scope needed to initialize db at app startup.
 using(var scope = app.Services.CreateScope()) {
@@ -176,6 +176,6 @@ using(var scope = app.Services.CreateScope()) {
         services.GetService<RoleManager<ApplicationRole>>());
     db.Initialize();
 }
-#endif
+//#endif
 
 app.Run();
