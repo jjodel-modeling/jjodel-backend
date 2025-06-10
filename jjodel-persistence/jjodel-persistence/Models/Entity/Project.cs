@@ -34,6 +34,8 @@ namespace jjodel_persistence.Models.Entity {
         public DateTime LastModified { get; set; }
 
         public bool IsFavorite { get; set; }
+        public bool Imported { get; set; }
+        public string Version { get; set; }
 
         public string AuthorId { get; set; }
         public ApplicationUser Author { get; set; }

@@ -14,6 +14,13 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public string Type { get; set; }
 
-        
+        [Required]
+        public bool Imported { get; set; }
+
+        [Required]
+        public string Version { get; set; }
+
+        // present only if imported.
+        public string? State { get; set; }
     }
 }

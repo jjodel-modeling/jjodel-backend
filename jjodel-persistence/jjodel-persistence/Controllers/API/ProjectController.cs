@@ -43,9 +43,10 @@ namespace jjodel_persistence.Controllers.API {
                         Type = createProjectRequest.Type,
                         Creation = DateTime.UtcNow,
                         LastModified = DateTime.UtcNow,
-                        State = "",
+                        State = createProjectRequest.State != null ? createProjectRequest.State : "",
                         Author = await this._userManager.FindByNameAsync(User.Identity.Name),
-
+                        Imported = createProjectRequest.Imported,
+                        Version = createProjectRequest.Version,
                         ViewpointsNumber = 0,
                         MetamodelsNumber = 0,
                         ModelsNumber = 0,
@@ -95,7 +96,7 @@ namespace jjodel_persistence.Controllers.API {
                 if(Guid.Empty == Id) {
                     return BadRequest();
                 }
-
+                // todo check permission to open project (public/private)
                 Project result = await this._projectService.GetById(Id);
 
                 if(result == null) {
