@@ -53,51 +53,6 @@ namespace jjodel_persistence.Controllers.API {
         }
 
 
-
-        //[Authorize(Roles = "Admin")]
-        //[HttpPost("Add")]
-        //public async Task<IActionResult> Add([FromBody] AspNetUserResponse request) {
-        //    try {
-        //        if(ModelState.IsValid) {
-        //            var user = new ApplicationUser {
-        //                Id = Guid.NewGuid().ToString(),
-        //                UserName = request.Email,
-        //                Surname = request.Surname,
-        //                Name = request.Name,
-        //                Email = request.Email,
-        //                EmailConfirmed = true,
-        //                PhoneNumber = request.PhoneNumber
-
-        //            };
-        //            string password = _authService.GenerateRandomPassword();
-        //            // create user.
-        //            var result = await _userManager.CreateAsync(user, password);
-        //            if(!result.Succeeded) {
-        //                return BadRequest();
-        //            }
-        //            // assign user role.
-        //            await _userManager.AddToRolesAsync(user, request.Roles);
-        //            // send mail.
-        //            await _mailService.SendEmail(
-        //                new List<string> { request.Email },
-        //                "Registrazione Completata", "Register",
-        //                new Register() {
-        //                    Name = request.Email,
-        //                    Password = password,
-        //                    Surname = request.Surname
-        //                });
-        //            return Ok(result);
-        //        }
-        //        else {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch(Exception ex) {
-        //        this._logger.LogError("Add user error:" + ex.Message);
-        //        return StatusCode(StatusCodes.Status500InternalServerError);
-        //    }
-        //}
-
         [AllowAnonymous]
         [HttpPost("confirm")]
         public async Task<IActionResult> Confirm([FromBody] ConfirmAccountRequest confirmAccountRequest) {
@@ -308,6 +263,7 @@ namespace jjodel_persistence.Controllers.API {
                     claims.Add(new Claim(ClaimTypes.Name, user.UserName));
                     claims.Add(new Claim(ClaimTypes.Email, user.Email));
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
+                    claims.Add(new Claim("_Id", user._Id != null ? user._Id : "-"));
                     foreach(var role in roles) {
                         claims.Add(new Claim(ClaimTypes.Role, role));
                     }
@@ -328,6 +284,7 @@ namespace jjodel_persistence.Controllers.API {
                 }
                 return BadRequest();
             }
+            
             catch(Exception ex) {
                 this._logger.LogError("Login error: " + ex.Message);
                 return BadRequest();
@@ -338,8 +295,6 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             try {
-                this._logger.LogError(ModelState.ErrorCount.ToString());
-                this._logger.LogError(ModelState.IsValid.ToString());
                 if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),

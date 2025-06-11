@@ -1,13 +1,15 @@
 using jjodel_persistence.Models.Entity;
+using jjodel_persistence.Models.Mail;
 using jjodel_persistence.Models.Settings;
 using jjodel_persistence.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Serilog;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -160,7 +162,7 @@ app.MapControllers();
 
 app.UseSerilogRequestLogging();
 
-//#if DEBUG
+#if DEBUG
 
 // scope needed to initialize db at app startup.
 using(var scope = app.Services.CreateScope()) {
@@ -175,7 +177,19 @@ using(var scope = app.Services.CreateScope()) {
         services.GetService<UserManager<ApplicationUser>>(),
         services.GetService<RoleManager<ApplicationRole>>());
     db.Initialize();
+
+    //MailService s = services.GetService<MailService>();
+    //s.SendEmail(new List<string> { @"juri.dirocco@univaq.it" }, "Test", "ConfirmAccount",
+    //                    new ConfirmAccount() {
+    //                        Name = "request.Name",
+    //                        Surname = "request.Surname",
+    //                        Token = "confirmToken",
+    //                        Id = "user.Id",
+    //                        Url = ""
+    //                    });
+
+   
 }
-//#endif
+#endif
 
 app.Run();

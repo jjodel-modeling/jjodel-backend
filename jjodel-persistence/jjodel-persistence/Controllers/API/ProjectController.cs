@@ -50,7 +50,7 @@ namespace jjodel_persistence.Controllers.API {
                         ViewpointsNumber = 0,
                         MetamodelsNumber = 0,
                         ModelsNumber = 0,
-                        IsFavorite = false,
+                        IsFavorite = false
                     };
                     if(await this._projectService.Add(project)) {
                         return Ok(Convert(project));
