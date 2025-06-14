@@ -47,10 +47,10 @@ namespace jjodel_persistence.Controllers.API {
                         Author = await this._userManager.FindByNameAsync(User.Identity.Name),
                         Imported = createProjectRequest.Imported,
                         Version = createProjectRequest.Version,
-                        ViewpointsNumber = 0,
-                        MetamodelsNumber = 0,
-                        ModelsNumber = 0,
-                        IsFavorite = false
+                        ViewpointsNumber = createProjectRequest.ViewpointsNumber,
+                        MetamodelsNumber = createProjectRequest.MetamodelsNumber,
+                        ModelsNumber = createProjectRequest.ViewpointsNumber,
+                        IsFavorite = createProjectRequest.IsFavorite,
                     };
                     if(await this._projectService.Add(project)) {
                         return Ok(Convert(project));

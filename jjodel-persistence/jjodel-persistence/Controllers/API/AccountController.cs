@@ -279,6 +279,7 @@ namespace jjodel_persistence.Controllers.API {
                         expires: expiry,
                         signingCredentials: creds
                     );
+                    
                     string t = new JwtSecurityTokenHandler().WriteToken(token);
                     return Ok(new TokenResponse() { Token = t, Expires = expiry });
                 }
@@ -375,8 +376,7 @@ namespace jjodel_persistence.Controllers.API {
                     }
                         await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
                         this._logger.LogInformation("The password has been reset");
-                        return Ok(); 
-                    
+                        return Ok();                    
                 }
 
                 return BadRequest();

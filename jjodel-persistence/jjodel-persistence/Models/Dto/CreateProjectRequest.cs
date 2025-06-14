@@ -20,6 +20,18 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public string Version { get; set; }
 
+        [Required]
+        public int ViewpointsNumber  { get; set; }
+
+        [Required]
+        public int MetamodelsNumber { get; set; }
+
+        [Required]
+        public int ModelsNumber { get; set; }
+
+        [Required]
+        public bool IsFavorite { get; set; }
+
         // present only if imported.
         public string? State { get; set; }
     }

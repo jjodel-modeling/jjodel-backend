@@ -9,6 +9,7 @@ namespace jjodel_persistence.Models.Dto {
 
         [Required]
         public string Title { get; set; }
+
         [Required]
         public string Version { get; set; }
 

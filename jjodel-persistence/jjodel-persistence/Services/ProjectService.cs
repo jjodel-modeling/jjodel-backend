@@ -28,6 +28,17 @@ namespace jjodel_persistence.Services {
             }
         }
 
+        public async Task<List<Project>> GetByAuthorId(Guid AuthorId) {
+            return await this._applicationDbContext.
+                Projects.
+                Include(p => p.Collaborators).
+                ThenInclude(p => p.Author).
+                Where(m =>
+                    m.Author.Id.Equals(AuthorId) ||
+                    m.Collaborators.Any(c => c.Id.Equals(AuthorId))
+                    ).ToListAsync();
+        }
+
         public async Task<List<Project>> GetByAuthor(string AuthorName) {
             return await this._applicationDbContext.
                 Projects.
@@ -43,7 +54,8 @@ namespace jjodel_persistence.Services {
             return await this._applicationDbContext.
                 Projects.
                 Include(p => p.Collaborators).
-                ThenInclude(p => p.Author).FirstOrDefaultAsync(m => m.Id == Id);
+                ThenInclude(p => p.Author).
+                FirstOrDefaultAsync(m => m.Id == Id);
         }
 
         public async Task<Project> GetByName(string Name) {
@@ -59,7 +71,6 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 Include(p=> p.Author).
-                AsNoTracking().
                 ToListAsync();
         }
 
