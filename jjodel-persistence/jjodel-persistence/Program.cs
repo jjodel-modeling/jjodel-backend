@@ -158,8 +158,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
-
 app.UseSerilogRequestLogging();
 
 #if DEBUG
@@ -178,17 +176,6 @@ using(var scope = app.Services.CreateScope()) {
         services.GetService<RoleManager<ApplicationRole>>());
     db.Initialize();
 
-    //MailService s = services.GetService<MailService>();
-    //s.SendEmail(new List<string> { @"juri.dirocco@univaq.it" }, "Test", "ConfirmAccount",
-    //                    new ConfirmAccount() {
-    //                        Name = "request.Name",
-    //                        Surname = "request.Surname",
-    //                        Token = "confirmToken",
-    //                        Id = "user.Id",
-    //                        Url = ""
-    //                    });
-
-   
 }
 #endif
 

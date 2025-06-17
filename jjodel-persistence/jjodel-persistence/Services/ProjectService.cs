@@ -58,6 +58,14 @@ namespace jjodel_persistence.Services {
                 FirstOrDefaultAsync(m => m.Id == Id);
         }
 
+        public async Task<Project> GetByJJodelId(string Id) {
+            return await this._applicationDbContext.
+                Projects.
+                Include(p => p.Collaborators).
+                ThenInclude(p => p.Author).
+                FirstOrDefaultAsync(m => m._Id == Id);
+        }
+
         public async Task<Project> GetByName(string Name) {
             return await this._applicationDbContext.
                 Projects.

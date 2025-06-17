@@ -41,8 +41,8 @@ namespace jjodel_persistence.Controllers.API {
                         Name = createProjectRequest.Name,
                         Description = createProjectRequest.Description,
                         Type = createProjectRequest.Type,
-                        Creation = DateTime.UtcNow,
-                        LastModified = DateTime.UtcNow,
+                        Creation = createProjectRequest.Imported ? createProjectRequest.Creation!.Value : DateTime.UtcNow,
+                        LastModified = createProjectRequest.Imported ? createProjectRequest.LastModified!.Value : DateTime.UtcNow,
                         State = createProjectRequest.State != null ? createProjectRequest.State : "",
                         Author = await this._userManager.FindByNameAsync(User.Identity.Name),
                         Imported = createProjectRequest.Imported,
@@ -51,6 +51,7 @@ namespace jjodel_persistence.Controllers.API {
                         MetamodelsNumber = createProjectRequest.MetamodelsNumber,
                         ModelsNumber = createProjectRequest.ViewpointsNumber,
                         IsFavorite = createProjectRequest.IsFavorite,
+                        
                     };
                     if(await this._projectService.Add(project)) {
                         return Ok(Convert(project));
@@ -106,6 +107,30 @@ namespace jjodel_persistence.Controllers.API {
             }
             catch(Exception ex) {
                 this._logger.LogError("Get project by id:" + ex.ToString());
+            }
+            return BadRequest();
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("jjodel/{Id:string}")]
+        public async Task<IActionResult> GetByJJodelId(string Id) {
+            // gets all project.
+            try {
+                this._logger.LogInformation("Get project by jjodel id request:" + Id);
+
+                if(string.IsNullOrWhiteSpace(Id)) {
+                    return BadRequest();
+                }
+                // todo check permission to open project (public/private)
+                Project result = await this._projectService.GetByJJodelId(Id);
+
+                if(result == null) {
+                    return BadRequest();
+                }
+                return Ok(Convert(result));
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Get project by jjodel id:" + ex.ToString());
             }
             return BadRequest();
         }

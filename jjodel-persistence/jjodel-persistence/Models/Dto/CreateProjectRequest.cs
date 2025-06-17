@@ -34,5 +34,11 @@ namespace jjodel_persistence.Models.Dto {
 
         // present only if imported.
         public string? State { get; set; }
+
+        // present only if imported.
+        public DateTime? Creation { get; set; }
+
+        // present only if imported.
+        public DateTime? LastModified { get; set; }
     }
 }
