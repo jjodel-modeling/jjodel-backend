@@ -106,13 +106,13 @@ namespace jjodel_persistence.Controllers.API {
                 return Ok(Convert(result));
             }
             catch(Exception ex) {
-                this._logger.LogError("Get project by id:" + ex.ToString());
+                this._logger.LogError("Get project by id: " + ex.ToString());
             }
             return BadRequest();
         }
 
         [Authorize(Roles = "User")]
-        [HttpGet("jjodel/{Id:string}")]
+        [HttpGet("jjodel/{Id}")]
         public async Task<IActionResult> GetByJJodelId(string Id) {
             // gets all project.
             try {
@@ -130,7 +130,7 @@ namespace jjodel_persistence.Controllers.API {
                 return Ok(Convert(result));
             }
             catch(Exception ex) {
-                this._logger.LogError("Get project by jjodel id:" + ex.ToString());
+                this._logger.LogError("Get project by jjodel id: " + ex.ToString());
             }
             return BadRequest();
         }
