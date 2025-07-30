@@ -485,7 +485,7 @@ namespace jjodel_persistence.Controllers.API {
                 Id = user.Id,
                 _Id = user._Id,
                 Email = user.Email,
-                Name = user.Surname,
+                Name = user.Name,
                 Surname = user.Surname,
                 Nickname = user.UserName,
                 Affiliation = user.Affiliation,
