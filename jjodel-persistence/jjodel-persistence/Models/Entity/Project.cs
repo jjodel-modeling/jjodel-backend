@@ -40,6 +40,8 @@ namespace jjodel_persistence.Models.Entity {
         public string AuthorId { get; set; }
         public ApplicationUser Author { get; set; }
 
+        public ApplicationUser? OriginalAuthor { get; set; } // the original author of the project, if it was imported
+
         public ICollection<ApplicationUser> Collaborators { get; set; }
 
     }

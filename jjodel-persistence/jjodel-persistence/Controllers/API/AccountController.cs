@@ -1,18 +1,19 @@
-﻿using jjodel_persistence.Models.Entity;
-using jjodel_persistence.Models.Mail;
+﻿using jjodel_persistence.Migrations;
 using jjodel_persistence.Models.Dto;
+using jjodel_persistence.Models.Entity;
+using jjodel_persistence.Models.Mail;
+using jjodel_persistence.Models.Settings;
 using jjodel_persistence.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using jjodel_persistence.Models.Settings;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
-
+using System.Security.Claims;
+using System.Text;
 
 namespace jjodel_persistence.Controllers.API {
     [Route("api/[controller]")]
@@ -27,7 +28,6 @@ namespace jjodel_persistence.Controllers.API {
         private readonly AuthService _authService;
         private readonly Jwt _jwtSettings;
         private readonly IConfiguration _configuration;
-
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -57,21 +57,19 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("confirm")]
         public async Task<IActionResult> Confirm([FromBody] ConfirmAccountRequest confirmAccountRequest) {
             try {
-                if(ModelState.IsValid) {
-                    this._logger.LogInformation("Confirming Account:" + confirmAccountRequest.UserId);
+                this._logger.LogInformation("Confirming Account:" + confirmAccountRequest.UserId);
 
-                    ApplicationUser user = await _userManager.FindByIdAsync(confirmAccountRequest.UserId);
-                    if(user != null) {
-                        confirmAccountRequest.Token = confirmAccountRequest.Token.Replace('§', '/');
-                        IdentityResult result = await _userManager.ConfirmEmailAsync(user, confirmAccountRequest.Token);
-                        if(result.Succeeded) {
-                            this._logger.LogInformation("Confirmed Account:" + confirmAccountRequest.UserId);
+                ApplicationUser user = await _userManager.FindByIdAsync(confirmAccountRequest.UserId);
+                if(user != null) {
+                    confirmAccountRequest.Token = confirmAccountRequest.Token.Replace('§', '/');
+                    IdentityResult result = await _userManager.ConfirmEmailAsync(user, confirmAccountRequest.Token);
+                    if(result.Succeeded) {
+                        this._logger.LogInformation("Confirmed Account:" + confirmAccountRequest.UserId);
 
-                            return Ok();
-                        }
+                        return Ok();
                     }
-                    this._logger.LogInformation("Confirming Account failed for user: " + confirmAccountRequest.UserId);
                 }
+                this._logger.LogInformation("Confirming Account failed for user: " + confirmAccountRequest.UserId);
 
                 return BadRequest();
             }
@@ -85,25 +83,24 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest) {
             try {
-                if(ModelState.IsValid) {
-                    this._logger.LogInformation("Changing Password: " + changePasswordRequest.UserName);
+                this._logger.LogInformation("Changing Password: " + changePasswordRequest.UserName);
 
-                    var user = await _userManager.FindByNameAsync(changePasswordRequest.UserName);
-                    if(user == null || !await _userManager.IsEmailConfirmedAsync(user)) {
-                        this._logger.LogInformation("User does not exists or is not confirmed: " + changePasswordRequest.UserName);
+                var user = await _userManager.FindByNameAsync(changePasswordRequest.UserName);
+                if(user == null || !await _userManager.IsEmailConfirmedAsync(user)) {
+                    this._logger.LogInformation("User does not exists or is not confirmed: " + changePasswordRequest.UserName);
 
-                        return BadRequest();
-                    }
-
-                    else {
-                        var res = await _userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.Password);
-                        if(res.Succeeded) {
-                            this._logger.LogInformation("Password changed: " + changePasswordRequest.UserName);
-                            return Ok();
-                        }
-                        this._logger.LogInformation("Change Password error: " + changePasswordRequest.UserName);
-                    }
+                    return BadRequest();
                 }
+
+                else {
+                    var res = await _userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.Password);
+                    if(res.Succeeded) {
+                        this._logger.LogInformation("Password changed: " + changePasswordRequest.UserName);
+                        return Ok();
+                    }
+                    this._logger.LogInformation("Change Password error: " + changePasswordRequest.UserName);
+                }
+
                 return BadRequest();
             }
             catch(Exception ex) {
@@ -238,54 +235,45 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest) {
             try {
-                if(ModelState.IsValid) {
 
-                    _logger.LogInformation("Login request by user: " + loginRequest.Email);
+                _logger.LogInformation("Login request by user: " + loginRequest.Email);
 
-                    ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
+                ApplicationUser user = await this._userManager.FindByEmailAsync(loginRequest.Email);
 
-                    if(user == null || user.IsDeleted || !user.EmailConfirmed) {
-                        _logger.LogWarning("User: " + loginRequest.Email + " does not exists, is deleted or is not confirmed.");
-                        return BadRequest();
-                    }
-
-                    var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
-
-                    if(!result.Succeeded) {
-                        _logger.LogWarning("User failed login: " + loginRequest.Email);
-                        return BadRequest();
-                    }
-                    _logger.LogInformation("User " + loginRequest.Email + " login successfully");
-
-                    var roles = await _signInManager.UserManager.GetRolesAsync(user);
-
-                    List<Claim> claims = new List<Claim>();
-                    claims.Add(new Claim(ClaimTypes.Name, user.UserName));
-                    claims.Add(new Claim(ClaimTypes.Email, user.Email));
-                    claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
-                    claims.Add(new Claim("_Id", user._Id != null ? user._Id : "-"));
-                    foreach(var role in roles) {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
-                    }
-
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._jwtSettings.SecurityKey));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                    var expiry = DateTime.Now.AddMinutes(System.Convert.ToInt32(this._jwtSettings.ExpiresInMinutes));
-
-                    var token = new JwtSecurityToken(
-                        _jwtSettings.Issuer,
-                        _jwtSettings.Audience,
-                        claims,
-                        expires: expiry,
-                        signingCredentials: creds
-                    );
-                    
-                    string t = new JwtSecurityTokenHandler().WriteToken(token);
-                    return Ok(new TokenResponse() { Token = t, Expires = expiry });
+                if(user == null || user.IsDeleted || !user.EmailConfirmed) {
+                    _logger.LogWarning("User: " + loginRequest.Email + " does not exists, is deleted or is not confirmed.");
+                    return BadRequest();
                 }
-                return BadRequest();
+
+                var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
+
+                if(!result.Succeeded) {
+                    _logger.LogWarning("User failed login: " + loginRequest.Email);
+                    return BadRequest();
+                }
+                _logger.LogInformation("User " + loginRequest.Email + " login successfully");
+
+                IList<string> roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+                JwtSecurityToken token = this._authService.CreateJwtToken(user, roles.ToList());
+
+                if(token == null) {
+                    _logger.LogWarning("Token creation failed for user: " + loginRequest.Email);
+                    return BadRequest();
+                }
+
+                user.RefreshToken = AuthService.GenerateRefreshToken();
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(this._jwtSettings.RefreshTokenValidityInDays);
+                await _userManager.UpdateAsync(user);
+
+                return Ok(
+                    new TokenResponse() {
+                        Token = new JwtSecurityTokenHandler().WriteToken(token),
+                        Expires = token.ValidTo,
+                        RefreshToken = user.RefreshToken,
+                        RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                    });
             }
-            
             catch(Exception ex) {
                 this._logger.LogError("Login error: " + ex.Message);
                 return BadRequest();
@@ -293,10 +281,52 @@ namespace jjodel_persistence.Controllers.API {
         }
 
         [AllowAnonymous]
+        [HttpPost]
+        [Route("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequest request) {
+            try {
+                var principal = this._authService.GetPrincipalFromExpiredToken(request.Token);
+                if(principal == null) {
+                    return BadRequest();
+                }
+                string username = principal.Identity.Name;
+                ApplicationUser user = await _userManager.FindByNameAsync(username);
+
+                if(user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now) {
+                    return BadRequest();
+                }
+                IList<string> roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+                JwtSecurityToken token = this._authService.CreateJwtToken(user, roles.ToList());
+
+                if(token == null) {
+                    _logger.LogWarning("Token creation failed for user: " + username);
+                    return BadRequest();
+                }
+
+                user.RefreshToken = AuthService.GenerateRefreshToken();
+
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new TokenResponse() {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    Expires = token.ValidTo,
+                    RefreshToken = user.RefreshToken,
+                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                });
+            }
+            catch(Exception ex) {
+                _logger.LogError("Refresh token error: " + ex.Message);
+                return BadRequest();
+            }
+        }
+
+
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             try {
-                if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
+                if(await this._userManager.FindByEmailAsync(request.Email) == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
                         _Id = request._Id,
@@ -342,10 +372,8 @@ namespace jjodel_persistence.Controllers.API {
                         });
                     return Ok(result);
                 }
-                else {
-                    
-                    return BadRequest();
-                }
+                return BadRequest();
+                
             }
             catch(Exception ex) {
                 this._logger.LogError("Register error: " + ex.Message);
@@ -358,30 +386,26 @@ namespace jjodel_persistence.Controllers.API {
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest) {
             try {
                 this._logger.LogInformation("Richiesto reset password");
-                if (ModelState.IsValid) {
-                    var user = await _userManager.FindByNameAsync(resetPasswordRequest.Nickname);
-                    if (user == null) {
-                        _logger.LogInformation("User " + resetPasswordRequest.Nickname + " not found");
-                        return BadRequest();
-                    }
-                    // generate password.
-                    string password = _authService.GenerateRandomPassword();
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var result = await _userManager.ResetPasswordAsync(user, token, password);
-
-                    if (!result.Succeeded) {
-
-                        this._logger.LogWarning("Password reset failed for user " + user.UserName);
-                        return BadRequest();
-                    }
-                        await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
-                        this._logger.LogInformation("The password has been reset");
-                        return Ok();                    
+                var user = await _userManager.FindByNameAsync(resetPasswordRequest.Nickname);
+                if(user == null) {
+                    _logger.LogInformation("User " + resetPasswordRequest.Nickname + " not found");
+                    return BadRequest();
                 }
+                // generate password.
+                string password = _authService.GenerateRandomPassword();
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, password);
 
-                return BadRequest();
+                if(!result.Succeeded) {
+
+                    this._logger.LogWarning("Password reset failed for user " + user.UserName);
+                    return BadRequest();
+                }
+                await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
+                this._logger.LogInformation("The password has been reset");
+                return Ok();
             }
-            catch (Exception ex) {
+            catch(Exception ex) {
                 this._logger.LogError("Reset error: " + ex.Message);
                 return BadRequest();
             }
@@ -391,35 +415,53 @@ namespace jjodel_persistence.Controllers.API {
         public async Task<IActionResult> ResetPasswordWithEmail([FromBody] ResetPasswordRequestWithEmail retrivePasswordRequest) {
             try {
                 this._logger.LogInformation("Richiesto reset password");
-                if (ModelState.IsValid) {
-                    var user = await _userManager.FindByEmailAsync(retrivePasswordRequest.Email);
-                    
-                    if (user == null) {
-                        _logger.LogInformation("User " + retrivePasswordRequest.Email + " not found");
-                        return BadRequest();
-                    }
-                    // generate password.
-                    string password = _authService.GenerateRandomPassword();
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var result = await _userManager.ResetPasswordAsync(user, token, password);
 
-                    if (!result.Succeeded) {
+                var user = await _userManager.FindByEmailAsync(retrivePasswordRequest.Email);
 
-                        this._logger.LogWarning("Password reset failed for user " + user.UserName);
-                        return BadRequest();
-                    }
-                    await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = user.UserName });
-                    this._logger.LogInformation("The password has been reset");
-                    return Ok();
-
+                if(user == null) {
+                    _logger.LogInformation("User " + retrivePasswordRequest.Email + " not found");
+                    return BadRequest();
                 }
+                // generate password.
+                string password = _authService.GenerateRandomPassword();
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, password);
 
-                return BadRequest();
+                if(!result.Succeeded) {
+
+                    this._logger.LogWarning("Password reset failed for user " + user.UserName);
+                    return BadRequest();
+                }
+                await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = user.UserName });
+                this._logger.LogInformation("The password has been reset");
+                return Ok();
+
             }
-            catch (Exception ex) {
+            catch(Exception ex) {
                 this._logger.LogError("Reset error: " + ex.Message);
                 return BadRequest();
             }
+        }
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpPost]
+        [Route("revoke/{username}")]
+        public async Task<IActionResult> Revoke(string username) {
+            try {
+                ApplicationUser user = await _userManager.FindByNameAsync(username);
+                if(user == null) {
+                    return BadRequest();
+                }
+
+                user.RefreshToken = null;
+                await _userManager.UpdateAsync(user);
+
+                return Ok();
+            }
+            catch(Exception ex) {
+                _logger.LogError($"Revoke token error for user {username}: " + ex.Message);
+                return BadRequest();
+            }            
         }
 
         [Authorize(Roles = "Admin, User")]
@@ -427,48 +469,47 @@ namespace jjodel_persistence.Controllers.API {
         public async Task<IActionResult> Update([FromBody] UpdateUserRequest updateUserRequest) {
 
             try {
-                if(ModelState.IsValid) {
-                    this._logger.LogInformation("Edit user request:" + updateUserRequest.Id);
+                this._logger.LogInformation("Edit user request:" + updateUserRequest.Id);
 
-                    ApplicationUser user = await _userManager.FindByIdAsync(updateUserRequest.Id);
-                    if(user == null || user.IsDeleted) {
-                        _logger.LogWarning("User: " + updateUserRequest.Id + " does not exists or is deleted.");
+                ApplicationUser user = await _userManager.FindByIdAsync(updateUserRequest.Id);
+                if(user == null || user.IsDeleted) {
+                    _logger.LogWarning("User: " + updateUserRequest.Id + " does not exists or is deleted.");
 
-                        return BadRequest();
-                    }
+                    return BadRequest();
+                }
 
-                    // unique email verification  
-                    var existingUser = await this._userManager.FindByEmailAsync(updateUserRequest.Email);
-                    if(existingUser != null && existingUser.Id != updateUserRequest.Id) {
-                        this._logger.LogWarning(updateUserRequest.Id + " is attempting to update the email of " + existingUser.Id);
-                        return BadRequest();
+                // unique email verification  
+                var existingUser = await this._userManager.FindByEmailAsync(updateUserRequest.Email);
+                if(existingUser != null && existingUser.Id != updateUserRequest.Id) {
+                    this._logger.LogWarning(updateUserRequest.Id + " is attempting to update the email of " + existingUser.Id);
+                    return BadRequest();
 
-                    }
+                }
 
-                    // update fields.
-                    user._Id = updateUserRequest._Id;
-                    user.Surname = updateUserRequest.Surname;
-                    user.Name = updateUserRequest.Name;
-                    user.UserName = updateUserRequest.Nickname;
-                    user.Affiliation = updateUserRequest.Affiliation;
-                    user.Country = updateUserRequest.Country;
-                    user.PhoneNumber = updateUserRequest.PhoneNumber;
-                    user.Email = updateUserRequest.Email;
-                    user.PhoneNumber = updateUserRequest.PhoneNumber;
-                    user.BirthDate = updateUserRequest.BirthDate;
-                    if(user.NewsletterEnabled != updateUserRequest.Newsletter ) {
-                        user.NewsletterEnabled = updateUserRequest.Newsletter;
-                        if(updateUserRequest.Newsletter) {
-                            user.NewsletterEnableDate = DateTime.UtcNow;
-                        }
-                    }
-
-                    var result = await _userManager.UpdateAsync(user);
-
-                    if(result.Succeeded) {                        
-                        return Ok();
+                // update fields.
+                user._Id = updateUserRequest._Id;
+                user.Surname = updateUserRequest.Surname;
+                user.Name = updateUserRequest.Name;
+                user.UserName = updateUserRequest.Nickname;
+                user.Affiliation = updateUserRequest.Affiliation;
+                user.Country = updateUserRequest.Country;
+                user.PhoneNumber = updateUserRequest.PhoneNumber;
+                user.Email = updateUserRequest.Email;
+                user.PhoneNumber = updateUserRequest.PhoneNumber;
+                user.BirthDate = updateUserRequest.BirthDate;
+                if(user.NewsletterEnabled != updateUserRequest.Newsletter) {
+                    user.NewsletterEnabled = updateUserRequest.Newsletter;
+                    if(updateUserRequest.Newsletter) {
+                        user.NewsletterEnableDate = DateTime.UtcNow;
                     }
                 }
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if(result.Succeeded) {
+                    return Ok();
+                }
+
                 return BadRequest();
             }
             catch(Exception ex) {

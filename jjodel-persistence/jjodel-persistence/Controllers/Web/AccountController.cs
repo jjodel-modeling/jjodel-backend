@@ -13,11 +13,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using jjodel_persistence.Models.Mail;
-using System.Linq;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Microsoft.Extensions.Configuration;
+
 
 namespace jjodel_persistence.Controllers.Web {
 
@@ -400,15 +397,17 @@ namespace jjodel_persistence.Controllers.Web {
                 }
                 await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
                 this._logger.LogInformation("The password has been reset");
-                return Ok();
+                ViewBag.ResetPasswordMsg = "The password has been reset!";
             }
             catch(Exception ex) {
                 this._logger.LogError(ex.Message);
+
             }
-            return View();
+            return View(resetPasswordRequest);
+
         }
 
 
-        
+
     }
 }
