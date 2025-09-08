@@ -42,7 +42,6 @@ namespace jjodel_persistence.Services {
                 var factory = _email.Create()
                     .SetFrom(from)
                     .To(this.Convert(to))
-                    .BCC("andreaperelli.95@gmail.com") //TODO: remove.
                     .Subject(subject);
 
                 factory.UsingTemplateFromFile(
