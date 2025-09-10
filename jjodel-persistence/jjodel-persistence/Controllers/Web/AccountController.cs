@@ -400,7 +400,8 @@ namespace jjodel_persistence.Controllers.Web {
                 }
                 await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = resetPasswordRequest.Nickname });
                 this._logger.LogInformation("The password has been reset");
-                return Ok();
+                return Redirect("/Account/Login");
+
             }
             catch(Exception ex) {
                 this._logger.LogError(ex.Message);

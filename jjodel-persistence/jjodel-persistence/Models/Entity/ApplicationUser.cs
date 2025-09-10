@@ -30,6 +30,8 @@ namespace jjodel_persistence.Models.Entity {
         public bool IsDeleted { get; set; }
         public DateTime DeletionDate { get; set; }
 
+        public DateTime? RegistrationDate { get; set; }
+
         [Required]
         public bool NewsletterEnabled { get; set; }
         public DateTime NewsletterEnableDate { get; set; }

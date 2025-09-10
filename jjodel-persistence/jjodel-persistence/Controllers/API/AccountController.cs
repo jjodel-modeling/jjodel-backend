@@ -311,13 +311,14 @@ namespace jjodel_persistence.Controllers.API {
                         Country = request.Country,
                         BirthDate = request.BirthDate.HasValue ? request.BirthDate.Value : DateTime.MinValue,
                         Affiliation = request.Affiliation,
-                        PhoneNumber = request.PhoneNumber
+                        PhoneNumber = request.PhoneNumber,
+                        RegistrationDate = DateTime.UtcNow
                     };
 
                     // create user.
                     var result = await _userManager.CreateAsync(user, request.Password);
                     if(!result.Succeeded) {
-                        _logger.LogWarning("Registration process failed: " + string.Join(";", result.Errors.Select(e => "Code: " + e.Code + " Description" + e.Description)));
+                        _logger.LogWarning("Registration process failed for user " + request.Email + ": " + string.Join(";", result.Errors.Select(e => "Code: " + e.Code + " Description" + e.Description)));
                         return BadRequest();
                     }
                     _logger.LogInformation("User " + request.Email + " was registered");
