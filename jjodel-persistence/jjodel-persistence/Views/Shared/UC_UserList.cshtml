@@ -49,7 +49,7 @@
                     : (DateTime?)null;
 
                     DateTime? RegistrationDate = user.RegistrationDate.HasValue
-                    ? TimeZoneInfo.ConvertTimeFromUtc(user.LastLogin.Value, timeZone)
+                    ? TimeZoneInfo.ConvertTimeFromUtc(user.RegistrationDate.Value, timeZone)
                     : (DateTime?)null;
                 }
 
