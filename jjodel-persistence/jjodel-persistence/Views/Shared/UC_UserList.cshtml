@@ -42,8 +42,19 @@
                 <td>@user.Surname</td>
                 <td>@user.Email</td>
                 <td>@user.Country</td>
-                <td>@user.RegistrationDate?.ToString()</td>
-                <td>@user.LastLogin?.ToString()</td>
+                @{
+                    var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+                    DateTime? LastLogin = user.LastLogin.HasValue
+                    ? TimeZoneInfo.ConvertTimeFromUtc(user.LastLogin.Value, timeZone)
+                    : (DateTime?)null;
+
+                    DateTime? RegistrationDate = user.RegistrationDate.HasValue
+                    ? TimeZoneInfo.ConvertTimeFromUtc(user.LastLogin.Value, timeZone)
+                    : (DateTime?)null;
+                }
+
+                <td>@RegistrationDate?.ToString()</td>
+                <td>@LastLogin?.ToString()</td>
                 <td>@user.PhoneNumber</td>
                 <td>@user.Affiliation</td>
                 <td>@user.Author?.Count</td>
