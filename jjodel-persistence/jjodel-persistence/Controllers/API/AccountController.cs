@@ -257,7 +257,11 @@ namespace jjodel_persistence.Controllers.API {
                     }
                     _logger.LogInformation("User " + loginRequest.Email + " login successfully");
 
-                    var roles = await _signInManager.UserManager.GetRolesAsync(user);
+                    // set last login.
+                    user.LastLogin = DateTime.UtcNow;
+                    await this._userManager.UpdateAsync(user);
+
+                    var roles = await this._signInManager.UserManager.GetRolesAsync(user);
 
                     List<Claim> claims = new List<Claim>();
                     claims.Add(new Claim(ClaimTypes.Name, user.UserName));

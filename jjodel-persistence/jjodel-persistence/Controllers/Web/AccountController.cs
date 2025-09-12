@@ -192,6 +192,10 @@ namespace jjodel_persistence.Controllers.Web {
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
+                // set last login.
+                user.LastLogin = DateTime.UtcNow;
+                await this._userManager.UpdateAsync(user);
+
                 return RedirectToAction("Index", "Home");
             }
             catch(Exception ex) {
@@ -229,6 +233,7 @@ namespace jjodel_persistence.Controllers.Web {
                     user.NewsletterEnableDate = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);                    
                     user.DeletionDate = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
                     user.BirthDate = DateTime.SpecifyKind(user.BirthDate, DateTimeKind.Utc);
+                    user.RegistrationDate = DateTime.UtcNow;
 
                     if(ModelState.Where(ms =>
                             ms.Value.Errors.Count > 0 &&

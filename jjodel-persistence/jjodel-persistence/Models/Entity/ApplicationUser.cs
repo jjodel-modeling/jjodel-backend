@@ -32,6 +32,8 @@ namespace jjodel_persistence.Models.Entity {
 
         public DateTime? RegistrationDate { get; set; }
 
+        public DateTime? LastLogin { get; set; }
+
         [Required]
         public bool NewsletterEnabled { get; set; }
         public DateTime NewsletterEnableDate { get; set; }

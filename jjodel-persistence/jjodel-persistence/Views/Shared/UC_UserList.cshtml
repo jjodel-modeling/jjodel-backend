@@ -12,6 +12,7 @@
             <th>Email</th>
             <th>Country</th>
             <th>Registration Date</th>
+            <th>Last Login</th>
             <th>Phone Number</th>
             <th>Affiliation</th>
             <th>Created Projects</th>
@@ -41,7 +42,8 @@
                 <td>@user.Surname</td>
                 <td>@user.Email</td>
                 <td>@user.Country</td>
-                <td>@user.RegistrationDate?.ToShortDateString()</td>
+                <td>@user.RegistrationDate?.ToLocalTime().ToString()</td>
+                <td>@user.LastLogin?.ToLocalTime().ToString()</td>
                 <td>@user.PhoneNumber</td>
                 <td>@user.Affiliation</td>
                 <td>@user.Author?.Count</td>
@@ -68,7 +70,8 @@
             <th>Surname</th>
             <th>Email</th>
             <th>Country</th>
-            <th>BirthDate</th>
+            <th>Registration Date</th>
+            <th>Last Login</th>
             <th>Phone Number</th>
             <th>Affiliation</th>
             <th>Created Projects</th>
