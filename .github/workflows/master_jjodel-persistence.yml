@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Build with dotnet
-        run: dotnet build jjodel-persistence/jjodel-persistence.sln --configuration Release  
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish jjodel-persistence/jjodel-persistence.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -38,9 +38,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -50,13 +47,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_68B2683E51D94CF69EF484CA14492C25 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1A7F01E32E434E59906F63C30BFB49FB }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_82F0854B3D1D4F4E9483799E40405CDF }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6F51F753C8E6491891693113768816BF }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E9210D6129854C8CA5F1C68AF4EE74B6 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A72ECE61BCD243A8B75A8E26D3349CFE }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
