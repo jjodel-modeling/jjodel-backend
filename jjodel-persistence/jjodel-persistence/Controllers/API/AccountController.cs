@@ -300,7 +300,8 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             try {
-                if(ModelState.IsValid && await this._userManager.FindByEmailAsync(request.Email) == null) {
+                ApplicationUser existingUser = await this._userManager.FindByEmailAsync(request.Email);
+                if(ModelState.IsValid &&  existingUser == null) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
                         _Id = request._Id,
@@ -348,7 +349,11 @@ namespace jjodel_persistence.Controllers.API {
                     return Ok(result);
                 }
                 else {
-                    
+                    if(existingUser != null) {
+                        _logger.LogWarning("Registration process failed: user " + request.Email + " already exists.");
+                        return BadRequest("Registration process failed: user " + request.Email + " already exists.");
+
+                    }
                     return BadRequest();
                 }
             }
