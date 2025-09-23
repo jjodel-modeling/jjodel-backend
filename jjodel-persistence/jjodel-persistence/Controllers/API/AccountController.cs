@@ -314,7 +314,7 @@ namespace jjodel_persistence.Controllers.API {
                         NewsletterEnableDate = request.NewsletterEnabled ? DateTime.UtcNow : DateTime.MinValue,
                         Country = request.Country,
                         BirthDate = request.BirthDate.HasValue ? request.BirthDate.Value : DateTime.MinValue,
-                        Affiliation = request.Affiliation,
+                        Affiliation = !string.IsNullOrEmpty(request.Affiliation) ? request.Affiliation : "",
                         PhoneNumber = request.PhoneNumber,
                         RegistrationDate = DateTime.UtcNow
                     };

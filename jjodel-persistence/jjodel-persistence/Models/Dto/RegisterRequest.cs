@@ -14,8 +14,8 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public string Nickname { get; set; }
 
-        [Required]
-        public string Affiliation { get; set; }
+        
+        public string? Affiliation { get; set; }
 
         [Required]
         public string Country { get; set; }
