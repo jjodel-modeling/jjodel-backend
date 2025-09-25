@@ -13,11 +13,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using jjodel_persistence.Models.Mail;
-using System.Linq;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Microsoft.Extensions.Configuration;
+
 
 namespace jjodel_persistence.Controllers.Web {
 

@@ -1,17 +1,18 @@
-﻿using jjodel_persistence.Models.Entity;
+﻿using jjodel_persistence.Models.Dto;
+using jjodel_persistence.Models.Entity;
 using jjodel_persistence.Models.Mail;
-using jjodel_persistence.Models.Dto;
+using jjodel_persistence.Models.Settings;
 using jjodel_persistence.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using jjodel_persistence.Models.Settings;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace jjodel_persistence.Controllers.API {
@@ -238,6 +239,8 @@ namespace jjodel_persistence.Controllers.API {
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest) {
             try {
+                LoginResponse response = new LoginResponse();
+
                 if(ModelState.IsValid) {
 
                     _logger.LogInformation("Login request by user: " + loginRequest.Email);
@@ -246,14 +249,18 @@ namespace jjodel_persistence.Controllers.API {
 
                     if(user == null || user.IsDeleted || !user.EmailConfirmed) {
                         _logger.LogWarning("User: " + loginRequest.Email + " does not exists, is deleted or is not confirmed.");
-                        return BadRequest();
+                        response.Title = "Login failed";
+                        response.Description = "Your account is not ready to use. Please confirm your email via the link we sent.  Or, if already confirmed, reset your password to continue. ";
+                        return BadRequest(response);
                     }
 
                     var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
 
                     if(!result.Succeeded) {
                         _logger.LogWarning("User failed login: " + loginRequest.Email);
-                        return BadRequest();
+                        response.Title = "Login failed";
+                        response.Description = "Invalid credentials.";
+                        return BadRequest(response);
                     }
                     _logger.LogInformation("User " + loginRequest.Email + " login successfully");
 
@@ -283,9 +290,10 @@ namespace jjodel_persistence.Controllers.API {
                         expires: expiry,
                         signingCredentials: creds
                     );
-                    
-                    string t = new JwtSecurityTokenHandler().WriteToken(token);
-                    return Ok(new TokenResponse() { Token = t, Expires = expiry });
+
+                    response.Token = new JwtSecurityTokenHandler().WriteToken(token);
+                    response.Expires = expiry;
+                    return Ok(response);
                 }
                 return BadRequest();
             }
@@ -299,9 +307,13 @@ namespace jjodel_persistence.Controllers.API {
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
+            RegisterResponse response = new RegisterResponse();
+            response.Title = "Registration completed";
+            response.Description = "A confirmation email has been sent to your email address. Please confirm your account before logging in.";
             try {
+              
                 ApplicationUser existingUser = await this._userManager.FindByEmailAsync(request.Email);
-                if(ModelState.IsValid &&  existingUser == null) {
+                if(ModelState.IsValid &&  (existingUser == null || existingUser.IsDeleted)) {
                     var user = new ApplicationUser {
                         Id = Guid.NewGuid().ToString(),
                         _Id = request._Id,
@@ -323,8 +335,12 @@ namespace jjodel_persistence.Controllers.API {
                     // create user.
                     var result = await _userManager.CreateAsync(user, request.Password);
                     if(!result.Succeeded) {
-                        _logger.LogWarning("Registration process failed for user " + request.Email + ": " + string.Join(";", result.Errors.Select(e => "Code: " + e.Code + " Description" + e.Description)));
-                        return BadRequest();
+                        this._logger.LogWarning("Registration process failed for user " + request.Email + ": " + string.Join(";", result.Errors.Select(e => "Code: " + e.Code + " Description" + e.Description)));
+
+                        response.Title = "Registration process failed";
+                        response.Description = "The following fields are invalid: " + string.Join(" ", result.Errors.Select(e => e.Description));
+
+                        return BadRequest(response);
                     }
                     _logger.LogInformation("User " + request.Email + " was registered");
                     // assign user role.
@@ -343,23 +359,28 @@ namespace jjodel_persistence.Controllers.API {
                             Token = confirmToken,
                             Id = user.Id,
                             Url = this._configuration["FrontendEndpoint"]
-
-
                         });
                     return Ok(result);
                 }
                 else {
-                    if(existingUser != null) {
-                        _logger.LogWarning("Registration process failed: user " + request.Email + " already exists.");
-                        return BadRequest("Registration process failed: user " + request.Email + " already exists.");
+                    response.Title = "Registration process failed";
+                    var errorFields = ModelState.Where(ms => ms.Value.Errors.Count > 0).Select(ms => ms.Key);
+                    response.Description  = "The following fields are invalid: " + string.Join(", ", errorFields) + ".";
 
+                    if(existingUser != null && !existingUser.IsDeleted) {
+                        this._logger.LogWarning("Registration process failed: user " + request.Email + " already exists.");
+                        response.Description = "An account with this email address already exists.";
+                        return BadRequest(response);
                     }
-                    return BadRequest();
+                   
+                    return BadRequest(response);
                 }
             }
             catch(Exception ex) {
                 this._logger.LogError("Register error: " + ex.Message);
-                return BadRequest();
+                response.Title = "Registration error";
+                response.Description = "An error occurred during registration. Please try again later.";
+                return BadRequest(response);
             }
         }
 
