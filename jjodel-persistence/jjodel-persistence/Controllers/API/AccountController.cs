@@ -250,7 +250,13 @@ namespace jjodel_persistence.Controllers.API {
                     if(user == null || user.IsDeleted || !user.EmailConfirmed) {
                         _logger.LogWarning("User: " + loginRequest.Email + " does not exists, is deleted or is not confirmed.");
                         response.Title = "Login failed";
-                        response.Description = "Your account is not ready to use. Please confirm your email via the link we sent.  Or, if already confirmed, reset your password to continue. ";
+                        if(user== null) {
+                            response.Description = "Invalid credentials.";
+
+                        }
+                        else {
+                            response.Description = "Your account is not ready to use. Please confirm your email via the link we sent.  Or, if already confirmed, reset your password to continue. ";
+                        }
                         return BadRequest(response);
                     }
 
