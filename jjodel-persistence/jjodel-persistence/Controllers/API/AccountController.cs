@@ -276,36 +276,70 @@ namespace jjodel_persistence.Controllers.API {
 
                     var roles = await this._signInManager.UserManager.GetRolesAsync(user);
 
-                    List<Claim> claims = new List<Claim>();
-                    claims.Add(new Claim(ClaimTypes.Name, user.UserName));
-                    claims.Add(new Claim(ClaimTypes.Email, user.Email));
-                    claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
-                    claims.Add(new Claim("_Id", user._Id != null ? user._Id : "-"));
-                    foreach(var role in roles) {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    JwtSecurityToken token = this._authService.CreateJwtToken(user, roles.ToList());
+
+                    if(token == null) {
+                        _logger.LogWarning("Token creation failed for user: " + loginRequest.Email);
+                        return BadRequest();
                     }
 
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._jwtSettings.SecurityKey));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                    var expiry = DateTime.Now.AddMinutes(System.Convert.ToInt32(this._jwtSettings.ExpiresInMinutes));
+                    user.RefreshToken = AuthService.GenerateRefreshToken();
+                    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(this._jwtSettings.RefreshTokenValidityInDays);
+                    await _userManager.UpdateAsync(user);
 
-                    var token = new JwtSecurityToken(
-                        _jwtSettings.Issuer,
-                        _jwtSettings.Audience,
-                        claims,
-                        expires: expiry,
-                        signingCredentials: creds
-                    );
-
-                    response.Token = new JwtSecurityTokenHandler().WriteToken(token);
-                    response.Expires = expiry;
-                    return Ok(response);
+                    return Ok(
+                        new TokenResponse() {
+                            Token = new JwtSecurityTokenHandler().WriteToken(token),
+                            Expires = token.ValidTo,
+                            RefreshToken = user.RefreshToken,
+                            RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                        });
                 }
                 return BadRequest();
             }
             
             catch(Exception ex) {
                 this._logger.LogError("Login error: " + ex.Message);
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        [Route("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequest request) {
+            try {
+                var principal = this._authService.GetPrincipalFromExpiredToken(request.Token);
+                if(principal == null) {
+                    return BadRequest();
+                }
+                string username = principal.Identity.Name;
+                ApplicationUser user = await _userManager.FindByNameAsync(username);
+
+                if(user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now) {
+                    return BadRequest();
+                }
+                IList<string> roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+                JwtSecurityToken token = this._authService.CreateJwtToken(user, roles.ToList());
+
+                if(token == null) {
+                    _logger.LogWarning("Token creation failed for user: " + username);
+                    return BadRequest();
+                }
+
+                user.RefreshToken = AuthService.GenerateRefreshToken();
+
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new TokenResponse() {
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    Expires = token.ValidTo,
+                    RefreshToken = user.RefreshToken,
+                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                });
+            }
+            catch(Exception ex) {
+                _logger.LogError("Refresh token error: " + ex.Message);
                 return BadRequest();
             }
         }
@@ -458,6 +492,28 @@ namespace jjodel_persistence.Controllers.API {
                 return BadRequest();
             }
         }
+
+        [Authorize(Roles = "Admin, User")]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> Revoke([FromBody] RevokeTokenRequest request) {
+            try {
+                ApplicationUser user = await _userManager.FindByNameAsync(request.UserName);
+                if(user == null) {
+                    return BadRequest();
+                }
+
+                user.RefreshToken = null;
+                await this._userManager.UpdateAsync(user);
+
+                return Ok();
+            }
+            catch(Exception ex) {
+                _logger.LogError($"Revoke token error for user {request.UserName}: " + ex.Message);
+                return BadRequest();
+            }
+        }
+
 
         [Authorize(Roles = "Admin, User")]
         [HttpPut]

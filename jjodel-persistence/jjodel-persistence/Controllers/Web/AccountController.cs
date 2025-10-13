@@ -176,6 +176,9 @@ namespace jjodel_persistence.Controllers.Web {
 
                 var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
 
+                if(result == null || !result.Succeeded) {
+                    return View(loginRequest);
+                }
 
                 var roles = await _signInManager.UserManager.GetRolesAsync(user);
 

@@ -124,6 +124,11 @@ namespace jjodel_persistence.Controllers.API {
                 // todo check permission to open project (public/private)
                 Project result = await this._projectService.GetByJJodelId(Id);
 
+                //todo: remove
+                result.Collaborators.Add(await this._userManager.FindByNameAsync(this.User.Identity.Name));
+                await this._projectService.Save();
+
+
                 if(result == null) {
                     return BadRequest();
                 }

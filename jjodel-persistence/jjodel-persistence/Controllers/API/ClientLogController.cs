@@ -35,7 +35,6 @@ namespace jjodel_persistence.Controllers.API {
             try {
                 if(ModelState.IsValid) {
                     ClientLog clientLog = Convert(createClientLog, await this._userManager.FindByNameAsync(User.Identity.Name));
-
                    
                     if(await this._clientLogService.Add(clientLog)) {
                         return Ok();
@@ -56,15 +55,24 @@ namespace jjodel_persistence.Controllers.API {
                 Id = new Guid(),
                 User = applicationUser,
                 Level = createClientLog.Level,
-                Title = createClientLog.Title,
+                Url = createClientLog.Url,
                 Version = createClientLog.Version,
+                State = createClientLog.State,
                 Creation = createClientLog.Creation,
-                Message = createClientLog.Message,
-                StackTrace = createClientLog.StackTrace,
-                CompoStack = createClientLog.CompoStack,
-                ContextJson = createClientLog.ContextJson,
-                DState = createClientLog.DState,
-                TransientJson = createClientLog.TransientJson
+                Message = createClientLog.Error.Message,
+                Error = createClientLog.Error.Error,
+                CompoStack = createClientLog.CompoStack,    
+                ReactMsg = createClientLog.ReactMsg,
+                Browser = createClientLog.Browser.Browser,
+                BrowserMajorVersion = createClientLog.Browser.BrowserMajorVersion,
+                BrowserVersion = createClientLog.Browser.BrowserVersion,
+                Cookies = createClientLog.Browser.Cookies,
+                Mobile = createClientLog.Browser.Mobile,
+                Os = createClientLog.Browser.Os,
+                OsVersion = createClientLog.Browser.OsVersion,
+                Screen = createClientLog.Browser.Screen,
+                UserAgent = createClientLog.Browser.UserAgent,
+                
             };
             return clientLog;
         }   

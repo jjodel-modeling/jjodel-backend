@@ -58,13 +58,13 @@ namespace jjodel_persistence.Services {
                     return true;
                 }
                 else {
-                    _logger.LogError($"Send mail error: {string.Join(",", res.ErrorMessages)}");
-                    _logger.LogError($"Available directories: {string.Join(",", Directory.GetDirectories(Directory.GetCurrentDirectory()).ToList())}");
+                    this._logger.LogError($"Send mail error: {string.Join(",", res.ErrorMessages)}");
+                    this._logger.LogError($"Available directories: {string.Join(",", Directory.GetDirectories(Directory.GetCurrentDirectory()).ToList())}");
                 }
 
             }
             catch(Exception ex) {
-                _logger.LogError($"Send mail error: {ex.Message}");
+                this._logger.LogError($"Send mail error: {ex.Message}");
             }
             return false;
         }
@@ -72,11 +72,7 @@ namespace jjodel_persistence.Services {
         public async Task<bool> SendEmail(List<string> to, string subject, string templateName, object viewModel) {
 
             return await this.SendEmail(_mailSettings.FromDefault, to, subject, templateName, viewModel, "it");
-
         }
-
-
-
 
         #region Convert
         private List<FluentEmail.Core.Models.Address> Convert(List<string> to) {

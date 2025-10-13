@@ -35,19 +35,35 @@ namespace jjodel_persistence.Controllers.Web {
         public async Task<ActionResult> List(string? type = "Error") {
 
             try {
+                // "Log", "Information", "Warning", "Error", "Exception", "DevError", "DevException")]
 
                 List<ClientLog> logs = new List<ClientLog>();
                 if(type == "All") {
                     logs = await this._analyticsService.GetAllAsync();
                 }
-                else if(type == "Warning") {
-                    logs = await this._analyticsService.GetAllWarningAsync();
-                }
                 else if(type == "Information") {
                     logs = await this._analyticsService.GetAllInformationAsync();
 
                 }
-                logs = await this._analyticsService.GetAllErrorAsync();
+                else if(type == "Warning") {
+                    logs = await this._analyticsService.GetAllWarningAsync();
+                }
+                else if(type == "Error") {
+                    logs = await this._analyticsService.GetAllErrorAsync();
+                }
+                else if(type == "Exception") {
+                    logs = await this._analyticsService.GetAllExceptionAsync();
+
+                }
+                else if(type == "DevError") {
+                    logs = await this._analyticsService.GetAllDevErrorAsync();
+
+                }
+                else {
+                    // DevException
+
+                }
+
                 return PartialView("~/Views/Shared/UC_AnalyticsDevList.cshtml", logs);
 
             }

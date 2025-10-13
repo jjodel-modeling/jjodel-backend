@@ -38,6 +38,9 @@ namespace jjodel_persistence.Models.Entity {
         public bool NewsletterEnabled { get; set; }
         public DateTime NewsletterEnableDate { get; set; }
 
+        public string? RefreshToken { get; set; }
+
+        public DateTime RefreshTokenExpiryTime { get; set; }
 
         [NotMapped]
         public string FullName { get { return this.Surname + " " + this.Name; } }
@@ -45,7 +48,7 @@ namespace jjodel_persistence.Models.Entity {
         public ICollection<ApplicationUserRole> ApplicationRoles { get; set; }
 
         [InverseProperty("Author")]
-        public ICollection<Project> Author { get; set; }
+        public ICollection<Project> Author { get; set; } // author of..
 
         //[InverseProperty("AuthorId")]
         public ICollection<Project> Collaborators { get; set; } // collaborate to many projects

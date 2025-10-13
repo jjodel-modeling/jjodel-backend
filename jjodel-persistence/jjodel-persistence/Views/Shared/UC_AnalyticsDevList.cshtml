@@ -18,9 +18,9 @@
         @foreach (var error in Model)
         {
             <tr>
-                <td>@error.Title</td>
+                <td>@error.Message</td>
                 <td>@error.Version</td>
-                <td>@error.DState</td>
+                <td>@error.State</td>
                 <td>@error.Creation.ToString("yyyy-MM-dd HH:mm")</td>
                 <td>@error.Message</td>
                 <td>
@@ -28,7 +28,7 @@
                         Show
                     </button>
                     <div id="stacktrace-@error.Id" class="collapse">
-                        <pre style="white-space: pre-wrap;">@error.StackTrace</pre>
+                        <pre style="white-space: pre-wrap;">@error.State</pre>
                     </div>
                 </td>
                 <td>

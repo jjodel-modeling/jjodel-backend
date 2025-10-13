@@ -38,10 +38,34 @@ namespace jjodel_persistence.Services {
                 .ToListAsync();
         }
 
+        public async Task<List<ClientLog>> GetAllDevErrorAsync() {
+            return await this._applicationDbContext.ClientLogs
+                .Where(c => c.Level == "DevError")
+                .Include(e => e.User)
+                .OrderByDescending(e => e.Creation)
+                .ToListAsync();
+        }
+
+        public async Task<List<ClientLog>> GetAllDevExceptionAsync() {
+            return await this._applicationDbContext.ClientLogs
+                .Where(c => c.Level == "DevException")
+                .Include(e => e.User)
+                .OrderByDescending(e => e.Creation)
+                .ToListAsync();
+        }
+
         public async Task<List<ClientLog>> GetAllErrorAsync() {
             return await this._applicationDbContext.ClientLogs
                 .Where(c => c.Level == "Error")
                 .Include(e => e.User) 
+                .OrderByDescending(e => e.Creation)
+                .ToListAsync();
+        }
+
+        public async Task<List<ClientLog>> GetAllExceptionAsync() {
+            return await this._applicationDbContext.ClientLogs
+                .Where(c => c.Level == "Exception")
+                .Include(e => e.User)
                 .OrderByDescending(e => e.Creation)
                 .ToListAsync();
         }
