@@ -1,19 +1,19 @@
-﻿using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using jjodel_persistence.Models.Dto;
+﻿using jjodel_persistence.Models.Dto;
 using jjodel_persistence.Models.Entity;
+using jjodel_persistence.Models.Mail;
 using jjodel_persistence.Models.Settings;
 using jjodel_persistence.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using jjodel_persistence.Models.Mail;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 
 namespace jjodel_persistence.Controllers.Web {
@@ -126,6 +126,36 @@ namespace jjodel_persistence.Controllers.Web {
                 this._logger.LogError(ex.Message);
             }
             return PartialView("~/Views/Shared/UC_UserForm.cshtml", user);
+        }
+
+        [HttpGet]
+        [Route("EnableUser/{Id}")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<ActionResult> EnableUser(string Id) {
+            try {
+                ApplicationUser admin = await _userManager.FindByNameAsync(User.Identity.Name);
+
+                this._logger.LogWarning("Confirming Account by admin " + admin.Id + ":" + Id);
+
+                ApplicationUser user = await this._userManager.FindByIdAsync(Id);
+                if(user != null) {
+
+                    user.EmailConfirmed = true;
+                    var result = await this._userManager.UpdateAsync(user);
+
+                    if(result.Succeeded) {
+                        this._logger.LogInformation("Confirmed Account by admin " + admin.Id + ": " + Id);
+
+                        return Json(new { success = true, Message = "Operation completed successfully." });
+                    }
+                }
+                this._logger.LogInformation("Confirming Account failed for user: " + Id);
+            }
+            catch(Exception ex) {
+                this._logger.LogError(ex.Message);
+            }
+            return Json(new { success = false, message = "Error updating user" });
+
         }
 
         [HttpGet]
@@ -414,7 +444,42 @@ namespace jjodel_persistence.Controllers.Web {
             return View();
         }
 
+        [HttpGet]
+        [Route("ResetPasswordByAdmin/{Id}")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
+        public async Task<ActionResult> ResetPasswordByAdmin(string Id) {
+            try {
 
-        
+                ApplicationUser admin = await _userManager.FindByNameAsync(User.Identity.Name);
+
+                this._logger.LogWarning("Reset Password by admin " + admin.Id + ":" + Id);
+
+                ApplicationUser user = await this._userManager.FindByIdAsync(Id);
+
+                if(user != null) {
+                    // generate password.
+                    string password = _authService.GenerateRandomPassword();
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await _userManager.ResetPasswordAsync(user, token, password);
+
+                    if(!result.Succeeded) {
+                        this._logger.LogWarning("Reset Password by admin " + admin.Id + " failed:" + Id);
+                        return BadRequest();
+                    }
+                    await _mailService.SendEmail(new List<string> { user.Email }, "Reset Password", "ResetPassword", new ResetPassword() { NewPassoword = password, Username = user.UserName });
+                    this._logger.LogInformation("The password has been reset");
+                    return Json(new { success = true, Message = "Operation completed successfully." });
+
+                }
+
+
+            }
+            catch(Exception ex) {
+                this._logger.LogError(ex.Message);
+            }
+            return Json(new { success = false, message = "Error resetting password" });
+
+        }
+
     }
 }

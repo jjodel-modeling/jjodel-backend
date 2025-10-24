@@ -125,8 +125,8 @@ namespace jjodel_persistence.Controllers.API {
                 Project result = await this._projectService.GetByJJodelId(Id);
 
                 //todo: remove
-                result.Collaborators.Add(await this._userManager.FindByNameAsync(this.User.Identity.Name));
-                await this._projectService.Save();
+                //result.Collaborators.Add(await this._userManager.FindByNameAsync(this.User.Identity.Name));
+                //await this._projectService.Save();
 
 
                 if(result == null) {
