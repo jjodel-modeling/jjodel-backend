@@ -67,6 +67,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
+                Include(p => p.Tags).
                 Where(m =>
                     m.Author.Id.Equals(AuthorId) ||
                     m.Collaborators.Any(c => c.Id.Equals(AuthorId))
@@ -78,6 +79,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
+                Include(p => p.Tags).
                 Where(m => 
                     m.Author.UserName.Equals(AuthorName) || 
                     m.Collaborators.Any(c => c.UserName.Equals(AuthorName))
@@ -89,6 +91,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
+                Include(p => p.Tags).
                 FirstOrDefaultAsync(m => m.Id == Id);
         }
 
@@ -97,6 +100,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
+                Include(p => p.Tags).
                 FirstOrDefaultAsync(m => m._Id == Id);
         }
 
@@ -105,6 +109,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 ThenInclude(p => p.Author).
+                Include(p => p.Tags).
                 FirstOrDefaultAsync(m => m.Name == Name);
         }
 
@@ -113,6 +118,7 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 Include(p=> p.Author).
+                Include(p => p.Tags).
                 ToListAsync();
         }
 
@@ -121,7 +127,18 @@ namespace jjodel_persistence.Services {
                 Projects.
                 Include(p => p.Collaborators).
                 Include(p => p.Author).
-                AsNoTracking().
+                Include(p => p.Tags).
+                AsNoTrackingWithIdentityResolution().
+                ToListAsync();
+        }
+
+        public async Task<List<Project>> GetsAsNoTrackingByTagName(string TagName) {
+            return await this._applicationDbContext.
+                Projects.
+                Include(p => p.Author).
+                Include(p => p.Tags).
+                AsNoTrackingWithIdentityResolution().
+                Where(p=> p.Tags.Any(t=> t.Name.ToLower().Contains(TagName.ToLower()))).
                 ToListAsync();
         }
 
@@ -129,6 +146,16 @@ namespace jjodel_persistence.Services {
             return await this._applicationDbContext.
                 ProjectTemplates.
                 AsNoTracking().
+                ToListAsync();
+        }
+
+        public async Task<List<ProjectTemplate>> GetTemplatesAsNoTrackingWithPagination(int Skip, int Take) {
+            return await this._applicationDbContext.
+                ProjectTemplates.
+                AsNoTracking().
+                OrderBy(pt => pt.Name).
+                Skip(Skip).
+                Take(Take).
                 ToListAsync();
         }
 
@@ -140,9 +167,7 @@ namespace jjodel_persistence.Services {
 
         public async Task<bool> Save() {
             try {
-                if(await this._applicationDbContext.SaveChangesAsync() > 0) {
-                    return true;
-                }
+                return await this._applicationDbContext.SaveChangesAsync() > 0;
             }
             catch(Exception ex) {
                 this._logger.LogError(ex.Message + " " + (ex.InnerException != null ? ex.InnerException.Message : ""));

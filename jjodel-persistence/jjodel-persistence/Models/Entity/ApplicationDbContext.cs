@@ -13,6 +13,7 @@ namespace jjodel_persistence.Models.Entity {
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectTemplate> ProjectTemplates { get; set; }
         public DbSet<ClientLog> ClientLogs { get; set; }
+        public DbSet<Tag> Tags { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
 

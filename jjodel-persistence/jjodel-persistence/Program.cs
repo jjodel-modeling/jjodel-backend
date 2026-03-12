@@ -5,15 +5,13 @@ using jjodel_persistence.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.OpenApi;
 using Serilog;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container (DI).
 
@@ -26,7 +24,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                // use postgre
                options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
                );
-
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
     options.SignIn.RequireConfirmedAccount =
@@ -44,8 +41,6 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 })
    .AddEntityFrameworkStores<ApplicationDbContext>()
    .AddDefaultTokenProviders();
-
-
 
 builder.Services.AddAuthentication(
     options => {
@@ -79,42 +74,32 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<ClientLogService>();
+builder.Services.AddScoped<TagService>();
 
 builder.Services.AddControllersWithViews(); // add api and MVC
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+
+// configure swagger
 builder.Services.AddSwaggerGen(options => {
-    
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme {
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
-
 
 //logger.
 builder.Host.UseSerilog((hostingContext, services, loggerConfiguration) => {
     loggerConfiguration
         .ReadFrom.Configuration(hostingContext.Configuration);
 }, writeToProviders: true);
+
+
 
 builder.Services.
     AddFluentEmail(builder.Configuration.GetValue<string>("MailSettings:FromDefault"))

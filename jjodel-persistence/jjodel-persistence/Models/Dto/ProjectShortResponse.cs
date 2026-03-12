@@ -1,13 +1,12 @@
-﻿using jjodel_persistence.Models.Entity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace jjodel_persistence.Models.Dto {
-    public class UpdateProjectRequest {
+    public class ProjectShortResponse {
 
         [Required]
         public Guid Id { get; set; }
 
-        public string? _Id { get; set; }
+        public string _Id { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -16,10 +15,7 @@ namespace jjodel_persistence.Models.Dto {
         public string Description { get; set; }
 
         [Required]
-        public string Type { get; set; }
-
-        //[Required]
-        public string State { get; set; }
+        public string Type { get; set; }       
 
         [Required]
         public double ViewpointsNumber { get; set; } // relationship?
@@ -30,15 +26,14 @@ namespace jjodel_persistence.Models.Dto {
         [Required]
         public double ModelsNumber { get; set; } // relationship?
 
+        public DateTime Creation { get; set; }
         public DateTime LastModified { get; set; }
 
         public bool IsFavorite { get; set; }
 
+        public string Author { get; set; }
+
         public ICollection<string> Collaborators { get; set; }
-
-        public List<string> TagNames { get; set; }
-
-
-
+        public ICollection<string> Tags { get; set; }
     }
 }

@@ -40,5 +40,7 @@ namespace jjodel_persistence.Models.Dto {
 
         // present only if imported.
         public DateTime? LastModified { get; set; }
+
+        public List<string> TagNames { get; set; }
     }
 }

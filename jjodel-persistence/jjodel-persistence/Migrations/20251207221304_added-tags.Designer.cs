@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using jjodel_persistence.Models.Entity;
@@ -11,13 +12,15 @@ using jjodel_persistence.Models.Entity;
 namespace jjodel_persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251207221304_added-tags")]
+    partial class addedtags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -126,21 +129,6 @@ namespace jjodel_persistence.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ProjectTag", b =>
-                {
-                    b.Property<Guid>("ProjectsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TagsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ProjectsId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("ProjectTag");
                 });
 
             modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationRole", b =>
@@ -416,6 +404,9 @@ namespace jjodel_persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("TagId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
@@ -434,6 +425,8 @@ namespace jjodel_persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Projects");
                 });
@@ -565,21 +558,6 @@ namespace jjodel_persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProjectTag", b =>
-                {
-                    b.HasOne("jjodel_persistence.Models.Entity.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("jjodel_persistence.Models.Entity.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("jjodel_persistence.Models.Entity.ApplicationUserRole", b =>
                 {
                     b.HasOne("jjodel_persistence.Models.Entity.ApplicationRole", "Role")
@@ -616,6 +594,10 @@ namespace jjodel_persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("jjodel_persistence.Models.Entity.Tag", null)
+                        .WithMany("Projects")
+                        .HasForeignKey("TagId");
+
                     b.Navigation("Author");
                 });
 
@@ -640,6 +622,11 @@ namespace jjodel_persistence.Migrations
                     b.Navigation("ApplicationRoles");
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("jjodel_persistence.Models.Entity.Tag", b =>
+                {
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }

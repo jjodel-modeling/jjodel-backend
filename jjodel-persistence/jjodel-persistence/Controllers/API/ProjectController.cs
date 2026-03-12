@@ -18,18 +18,21 @@ namespace jjodel_persistence.Controllers.API {
         private readonly ILogger<ProjectController> _logger;
         private readonly ProjectService _projectService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TagService _tagService;
         private readonly IMemoryCache _cache; // cache
 
         public ProjectController(
             ILogger<ProjectController> logger,
             ProjectService projectService,
             UserManager<ApplicationUser> userManager,
+            TagService tagService,
             IMemoryCache cache
             ) {
         
             this._logger = logger;
             this._projectService = projectService;
             this._userManager = userManager;
+            this._tagService = tagService;
             this._cache = cache;
         }
 
@@ -39,7 +42,9 @@ namespace jjodel_persistence.Controllers.API {
 
             try {
                 this._logger.LogInformation("Add Project request ");
-                if(ModelState.IsValid) {
+                
+
+                if (ModelState.IsValid) {
                     Project project = new Project() {
                         Id = Guid.NewGuid(),
                         _Id = createProjectRequest._Id != null ? createProjectRequest._Id : "",
@@ -56,8 +61,9 @@ namespace jjodel_persistence.Controllers.API {
                         MetamodelsNumber = createProjectRequest.MetamodelsNumber,
                         ModelsNumber = createProjectRequest.ViewpointsNumber,
                         IsFavorite = createProjectRequest.IsFavorite,
-                        
+                        Tags = (createProjectRequest.TagNames is not null && createProjectRequest.TagNames.Count > 0) ? await this._tagService.GetsByNames(createProjectRequest.TagNames) : new List<Tag>()
                     };
+                    
                     if(await this._projectService.Add(project)) {
                         return Ok(Convert(project));
                     }
@@ -149,7 +155,7 @@ namespace jjodel_persistence.Controllers.API {
         }
 
         [Authorize(Roles = "User")]
-        [HttpGet("jjodel/{Id}")]
+        [HttpGet("jjodel/{Id:minlength(1)}")]
         public async Task<IActionResult> GetByJJodelId(string Id) {
             // gets all project.
             try {
@@ -177,9 +183,25 @@ namespace jjodel_persistence.Controllers.API {
             return BadRequest();
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Admin,User")]
         [HttpGet]
         public async Task<IActionResult> Gets() {
+            // gets all project withot state property.
+            try {
+                this._logger.LogInformation("Get projects request.");
+                List<Project> projects = await this._projectService.GetByAuthor(User.Identity.Name);
+
+                return Ok(ConvertShort(projects));
+            }
+            catch(Exception ex) {
+                this._logger.LogError(ex.ToString());
+            }
+            return BadRequest();
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("full")]
+        public async Task<IActionResult> GetsFull() {
             // gets all project.
             try {
                 this._logger.LogInformation("Get projects request.");
@@ -230,6 +252,26 @@ namespace jjodel_persistence.Controllers.API {
             return BadRequest();
         }
 
+        [Authorize(Roles = "Admin, User")]
+        [HttpGet("get-templates/pagination/{Skip:int}/{Take:int}")]
+        public async Task<IActionResult> GetTemplatesWithPagination(int Skip, int Take) {
+            // gets all project template.
+            try {
+                this._logger.LogInformation("Get all project templates with pagination");
+
+                List<ProjectTemplate> templates = await _cache.GetOrCreateAsync($"project_template_{Skip}_{Take}", async entry => {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60);
+                    return await this._projectService.GetTemplatesAsNoTrackingWithPagination(Skip, Take);
+                });
+
+                return Ok(Convert(templates));
+            }
+            catch(Exception ex) {
+                this._logger.LogError(ex.ToString());
+            }
+            return BadRequest();
+        }
+
         [HttpGet("templates/{Id:guid}")]
         [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> GetTemplateById(Guid Id) {
@@ -254,11 +296,29 @@ namespace jjodel_persistence.Controllers.API {
         }
 
         [Authorize(Roles = "User")]
+        [HttpGet("search-by-tag/{TagName:minlength(1)}")]
+        public async Task<IActionResult> SearchByTags(string TagName) {
+            try {
+                this._logger.LogInformation("Search projects by tags request: " + TagName);
+
+                List<Project> projects = await this._projectService.GetsAsNoTrackingByTagName(TagName.Trim());
+
+
+                return Ok(ConvertShort(projects));
+            }
+            catch(Exception ex) {
+                this._logger.LogError("Search By Tag error: " + ex.ToString());
+                return BadRequest();
+            }
+        }
+
+
+        [Authorize(Roles = "User")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateProjectRequest updateProjectRequest) {
             try {
                 if(ModelState.IsValid) {
-                    this._logger.LogInformation("Edit user request:" + updateProjectRequest.Id);
+                    this._logger.LogInformation("Edit user request: " + updateProjectRequest.Id);
 
                     Project projectToUpdate = await this._projectService.GetById(updateProjectRequest.Id);
                     if(projectToUpdate != null) {
@@ -276,6 +336,11 @@ namespace jjodel_persistence.Controllers.API {
                         List<ApplicationUser> users = this._userManager.Users.Where(u => updateProjectRequest.Collaborators.Contains(u.UserName)).ToList();
 
                         projectToUpdate.Collaborators = users;
+
+                        if(updateProjectRequest.TagNames is not null && updateProjectRequest.TagNames.Count > 0) {
+                            projectToUpdate.Tags = await this._tagService.GetsByNames(updateProjectRequest.TagNames);
+
+                        }
 
                         if(await this._projectService.Save()) {
                             return Ok();
@@ -308,6 +373,8 @@ namespace jjodel_persistence.Controllers.API {
                 IsFavorite = p.IsFavorite,
                 Author = (p.Author != null) ? p.Author.UserName : "",
                 Collaborators = (p.Collaborators != null) ? p.Collaborators.Select(c=> c.UserName).ToList() : new List<string?>(),
+                Tags = (p.Tags != null) ? p.Tags.Select(c => c.Name).ToList() : new List<string?>(),
+
 
             };
             return response;
@@ -317,6 +384,36 @@ namespace jjodel_persistence.Controllers.API {
             List<ProjectResponse> result = new List<ProjectResponse>();
             foreach(Project project in projects) {
                 result.Add(Convert(project));
+            }
+            return result;
+        }
+
+        public static ProjectShortResponse ConvertShort(Project p) {
+            ProjectShortResponse response = new ProjectShortResponse() {
+                Id = p.Id,
+                _Id = p._Id,
+                Name = p.Name,
+                Description = p.Description,
+                Type = p.Type,
+                ViewpointsNumber = p.ViewpointsNumber,
+                MetamodelsNumber = p.MetamodelsNumber,
+                ModelsNumber = p.ModelsNumber,
+                Creation = p.Creation,
+                LastModified = p.LastModified,
+                IsFavorite = p.IsFavorite,
+                Author = (p.Author != null) ? p.Author.UserName : "",
+                Collaborators = (p.Collaborators != null) ? p.Collaborators.Select(c => c.UserName).ToList() : new List<string?>(),
+                Tags = (p.Tags != null) ? p.Tags.Select(c => c.Name).ToList() : new List<string?>(),
+
+            };
+            return response;
+
+        }
+
+        private static List<ProjectShortResponse> ConvertShort(List<Project> projects) {
+            List<ProjectShortResponse> result = new List<ProjectShortResponse>();
+            foreach(Project project in projects) {
+                result.Add(ConvertShort(project));
             }
             return result;
         }

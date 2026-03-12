@@ -42,6 +42,8 @@ namespace jjodel_persistence.Models.Entity {
 
         public ICollection<ApplicationUser> Collaborators { get; set; }
 
+        public ICollection<Tag> Tags { get; set; }
+
     }
 
 

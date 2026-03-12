@@ -37,5 +37,6 @@ namespace jjodel_persistence.Models.Dto {
         public string Author { get; set; }
 
         public ICollection<string> Collaborators { get; set; }
+        public ICollection<string> Tags { get; set; }
     }
 }
