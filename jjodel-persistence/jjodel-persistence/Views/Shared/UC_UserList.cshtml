@@ -66,8 +66,8 @@
                     : (DateTime?)null;
                 }
 
-                <td>@RegistrationDate?.ToString()</td>
-                <td>@LastLogin?.ToString()</td>
+                <td data-sort="@(user.RegistrationDate?.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">@RegistrationDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td data-sort="@(user.LastLogin?.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">@LastLogin?.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@user.Affiliation</td>
                 <td>@user.Author?.Count</td>
                 <td>@user.Collaborators?.Count</td>

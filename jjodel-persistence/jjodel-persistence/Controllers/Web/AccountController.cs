@@ -418,7 +418,7 @@ namespace jjodel_persistence.Controllers.Web {
                     return View(resetPasswordRequest);
                 }
 
-                var user = await _userManager.FindByNameAsync(resetPasswordRequest.Nickname);
+                ApplicationUser user = await _userManager.FindByNameAsync(resetPasswordRequest.Nickname);
                 if(user == null) {
                     _logger.LogInformation("User " + resetPasswordRequest.Nickname + " not found");
                     return BadRequest();
