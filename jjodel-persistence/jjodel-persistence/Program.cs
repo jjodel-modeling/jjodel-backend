@@ -80,6 +80,14 @@ builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<ClientLogService>();
 
+// CORS: origine = frontend configurato (FrontendEndpoint), già per-slot
+builder.Services.AddCors(options => {
+    options.AddPolicy("DefaultCors", policy => policy
+        .WithOrigins(builder.Configuration["FrontendEndpoint"]?.TrimEnd('/') ?? string.Empty)
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
+
 builder.Services.AddControllersWithViews(); // add api and MVC
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -147,11 +155,8 @@ app.UseStaticFiles();
 // must be before use auth.
 app.UseRouting();
 
-// global cors policy
-app.UseCors(x => x
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
+// global cors policy (origini ristrette: prod + staging)
+app.UseCors("DefaultCors");
 
 app.UseAuthentication();
 app.UseAuthorization();
