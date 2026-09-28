@@ -106,6 +106,7 @@
                 .then(data => {
                     document.getElementById("user-container").innerHTML = data;
                     let table = new DataTable("#example", {
+            responsive: true,
 
             layout: {
                 top1Start: {

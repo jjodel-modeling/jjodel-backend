@@ -1,18 +1,21 @@
 ﻿@model List<jjodel_persistence.Models.Entity.Project>
+@{
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+}
 
-<table id="project-list" class="table table-bordered table-responsive table-hover" style="width:100%">
+<table id="project-list" class="table table-bordered table-hover" style="width:100%">
     <caption>All Projects</caption>
     <thead>
         <tr>
-            <th>Name</th>
+            <th data-priority="1">Name</th>
             <th>Description</th>
-            <th>Type</th>
+            <th data-priority="3">Type</th>
             <th>State</th>
             <th>Creation</th>
-            <th>LastModified</th>
-            <th>Author</th>
+            <th data-priority="2">LastModified</th>
+            <th data-priority="4">Author</th>
             <th>Number of Collaborator</th>
-            <th>Options</th>
+            <th class="all">Options</th>
         </tr>
     </thead>
     <tbody>
@@ -33,8 +36,8 @@
                 else{
                     <td>-</td>
                 }
-                <td>@project.Creation</td>
-                <td>@project.LastModified</td>
+                <td data-sort="@project.Creation.ToString("yyyy-MM-ddTHH:mm:ss")">@TimeZoneInfo.ConvertTimeFromUtc(project.Creation, timeZone).ToString("dd/MM/yyyy HH:mm")</td>
+                <td data-sort="@project.LastModified.ToString("yyyy-MM-ddTHH:mm:ss")">@TimeZoneInfo.ConvertTimeFromUtc(project.LastModified, timeZone).ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@project.Author.UserName</td>
                 <td>@project.Collaborators?.Count</td>
 

@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.OpenApi;
 using Serilog;
 using System.Text;
 
@@ -80,10 +79,17 @@ builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<ClientLogService>();
 
-// CORS: origine = frontend configurato (FrontendEndpoint), già per-slot
+// CORS: frontend configurato (FrontendEndpoint) + origini aggiuntive (AllowedCorsOrigins), per-slot
+string[] corsOrigins = new[] { builder.Configuration["FrontendEndpoint"] }
+    .Concat(builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>() ?? Array.Empty<string>())
+    .Where(o => !string.IsNullOrWhiteSpace(o))
+    .Select(o => o!.TrimEnd('/'))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
 builder.Services.AddCors(options => {
     options.AddPolicy("DefaultCors", policy => policy
-        .WithOrigins(builder.Configuration["FrontendEndpoint"]?.TrimEnd('/') ?? string.Empty)
+        .WithOrigins(corsOrigins)
         .AllowAnyMethod()
         .AllowAnyHeader());
 });
@@ -92,28 +98,16 @@ builder.Services.AddControllersWithViews(); // add api and MVC
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
-    
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        In = ParameterLocation.Header,
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme {
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
 

@@ -1,17 +1,17 @@
 ﻿@model List<jjodel_persistence.Models.Entity.ClientLog>
-<table id="errorsTable" class="table table-bordered table-responsive table-hover" style="width:100%">
+<table id="errorsTable" class="table table-bordered table-hover" style="width:100%">
     <caption>All Dev Errors</caption>
     <thead>
         <tr>
-            <th>Title</th>
-            <th>Version</th>
+            <th data-priority="1">Title</th>
+            <th data-priority="3">Version</th>
             <th>State</th>
-            <th>When</th>
+            <th data-priority="2">When</th>
             <th>Message</th>
             <th>StackTrace</th>
             <th>Component Stack</th>
-            <th>User</th>
-            <th>Options</th>
+            <th data-priority="4">User</th>
+            <th class="all">Options</th>
         </tr>
     </thead>
     <tbody>

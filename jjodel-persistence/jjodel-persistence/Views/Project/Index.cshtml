@@ -88,6 +88,7 @@
                 .then(data => {
                     document.getElementById("project-container").innerHTML = data;
                     let table = new DataTable("#project-list", {
+            responsive: true,
 
             layout: {
                 top1Start: {

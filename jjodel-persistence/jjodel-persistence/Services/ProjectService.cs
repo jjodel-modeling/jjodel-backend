@@ -1,4 +1,5 @@
-﻿using jjodel_persistence.Models.Entity;
+﻿using jjodel_persistence.Models.Dto;
+using jjodel_persistence.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace jjodel_persistence.Services {
@@ -136,6 +137,49 @@ namespace jjodel_persistence.Services {
             return await this._applicationDbContext
                 .ProjectTemplates
                 .FirstOrDefaultAsync(p => p.Id == Id);
+        }
+
+        // project statistics for the backoffice dashboard. fromMonth = first day (UTC) of the 12-month window.
+        public async Task<ProjectStatsResponse> GetProjectStats(DateTime fromMonth) {
+            ProjectStatsResponse res = new ProjectStatsResponse();
+
+            DateTime last30Days = DateTime.UtcNow.AddDays(-30);
+            IQueryable<Project> projects = this._applicationDbContext.Projects.AsNoTracking();
+
+            // counters.
+            res.Total = await projects.CountAsync();
+            res.NewLast30Days = await projects.CountAsync(p => p.Creation >= last30Days);
+
+            // new projects per month (grouped in SQL).
+            var perMonth = await projects
+                .Where(p => p.Creation >= fromMonth)
+                .GroupBy(p => new { p.Creation.Year, p.Creation.Month })
+                .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+                .ToListAsync();
+
+            res.NewPerMonth = Enumerable.Range(0, 12)
+                .Select(i => fromMonth.AddMonths(i))
+                .Select(m => perMonth.FirstOrDefault(x => x.Year == m.Year && x.Month == m.Month)?.Count ?? 0)
+                .ToArray();
+
+            // public / private (anything that is not "public" counts as private).
+            res.Public = await projects.CountAsync(p => p.Type.ToLower() == "public");
+            res.Private = res.Total - res.Public;
+
+            // latest modified projects, without loading the State.
+            res.Latest = await projects
+                .OrderByDescending(p => p.LastModified)
+                .Take(5)
+                .Select(p => new LatestProjectResponse {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Author = p.Author != null ? p.Author.UserName : null,
+                    Type = p.Type,
+                    LastModified = p.LastModified
+                })
+                .ToListAsync();
+
+            return res;
         }
 
         public async Task<bool> Save() {
